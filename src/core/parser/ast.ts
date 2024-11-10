@@ -56,12 +56,11 @@ function addMultiLineComment<T extends Node>(comment: string | undefined, node: 
  *
  * @example
  * ```ts
- * // @ts-nocheck
  * import { z } from "zod"
  * ```
  */
 function createZodImportDeclaration() {
-  let declaration = factory.createImportDeclaration(
+  return factory.createImportDeclaration(
     undefined,
     factory.createImportClause(
       false,
@@ -73,10 +72,6 @@ function createZodImportDeclaration() {
     factory.createStringLiteral('zod'),
     undefined,
   )
-  declaration = addSingleLineComment('eslint-disable-next-line ts/ban-ts-comment', declaration)
-  declaration = addSingleLineComment('@ts-nocheck', declaration)
-
-  return declaration
 }
 
 /**
