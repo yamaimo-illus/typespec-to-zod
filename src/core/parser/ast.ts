@@ -1,6 +1,5 @@
 import type { ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
 import type { CallExpression, Identifier, Node, PropertyAssignment } from 'typescript'
-import type { ZodType } from '../constants'
 import consola from 'consola'
 import { isReferenceObject } from 'openapi3-ts/oas31'
 import { addSyntheticLeadingComment, factory, isCallExpression, NodeFlags, SyntaxKind } from 'typescript'
@@ -79,6 +78,29 @@ function createZodImportDeclaration() {
 
   return declaration
 }
+
+/**
+ * Represents the supported Zod types, including primitive types and other supported types.
+ *
+ * @see https://zod.dev/?id=primitives
+ */
+type ZodType =
+  | 'string'
+  | 'number'
+  | 'bigint'
+  | 'boolean'
+  | 'date'
+  | 'symbol'
+  | 'undefined'
+  | 'null'
+  | 'void'
+  | 'any'
+  | 'unknown'
+  | 'never'
+  | 'array'
+  | 'enum'
+  | 'object'
+  | 'union'
 
 /**
  * Creates a TypeScript property access expression for a specified zod type.

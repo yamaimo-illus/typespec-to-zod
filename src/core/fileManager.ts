@@ -4,7 +4,7 @@ import consola from 'consola'
 import { parse } from 'yaml'
 
 export class FileManager {
-  private openApiObject: OpenAPIObject
+  public openApiObject: OpenAPIObject
   constructor(
     private readonly inputPath: string,
     private readonly outputPath: string,
@@ -27,13 +27,5 @@ export class FileManager {
     catch (e) {
       consola.error(`Failed to write data to ${this.outputPath}:`, e)
     }
-  }
-
-  public get components() {
-    return this.openApiObject.components
-  }
-
-  public get paths() {
-    return this.openApiObject.paths
   }
 }

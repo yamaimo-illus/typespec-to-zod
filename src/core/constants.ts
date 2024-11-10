@@ -1,23 +1,3 @@
-/**
- * @see https://zod.dev/?id=primitives
- */
-export type ZodType = | 'string'
-  | 'number'
-  | 'bigint'
-  | 'boolean'
-  | 'date'
-  | 'symbol'
-  | 'undefined'
-  | 'null'
-  | 'void'
-  | 'any'
-  | 'unknown'
-  | 'never'
-  | 'array'
-  | 'enum'
-  | 'object'
-  | 'union'
-
 export const componentsComment
   = `
   oooooooo8                                                                                   o8

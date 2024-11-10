@@ -19,39 +19,30 @@ export class CodeGenerator {
     this.pathParser = new PathParser()
   }
 
-  private printAst(ast: ts.Node[]) {
-    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-    const file = ts.createSourceFile('', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS)
-    const result = ast.map(node => printer.printNode(ts.EmitHint.Unspecified, node, file))
-
-    return result.join(EOL + EOL)
-  }
-
   public generate() {
-    const components = this.fileManager.components
-    const paths = this.fileManager.paths
+    const openApiObject = this.fileManager.openApiObject
     const outputNodes: ts.Node[] = []
 
     // add import declaration
     outputNodes.push(ast.createZodImportDeclaration())
 
-    if (components) {
+    if (openApiObject.components) {
       if (this.generateComponents) {
-        const nodes = this.componentParser.toAst(components)
+        const nodes = this.componentParser.toAst(openApiObject.components)
         nodes[0] = ast.addMultiLineComment(componentsComment, nodes[0])
 
         outputNodes.push(...nodes)
       }
     }
-    if (paths) {
+    if (openApiObject.paths) {
       if (this.generatePaths) {
-        const nodes = this.pathParser.toAstPath(paths)
+        const nodes = this.pathParser.toAstPath(openApiObject.paths)
         nodes[0] = ast.addMultiLineComment(pathsComment, nodes[0])
 
         outputNodes.push(...nodes)
       }
       if (this.generateQueries) {
-        const nodes = this.pathParser.toAstQuey(paths)
+        const nodes = this.pathParser.toAstQuey(openApiObject.paths)
         nodes[0] = ast.addMultiLineComment(queriesComment, nodes[0])
 
         outputNodes.push(...nodes)
@@ -60,5 +51,13 @@ export class CodeGenerator {
 
     const output = this.printAst(outputNodes)
     this.fileManager.write(output)
+  }
+
+  private printAst(ast: ts.Node[]) {
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+    const file = ts.createSourceFile('', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS)
+    const result = ast.map(node => printer.printNode(ts.EmitHint.Unspecified, node, file))
+
+    return result.join(EOL + EOL)
   }
 }
