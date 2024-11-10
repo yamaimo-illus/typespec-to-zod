@@ -1,3 +1,7 @@
+export const schemaPrefix = 'schema'
+export const pathPrefix = 'path'
+export const queryPrefix = 'query'
+
 export const componentsComment
   = `
   oooooooo8                                                                                   o8

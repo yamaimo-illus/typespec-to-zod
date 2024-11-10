@@ -3,6 +3,7 @@ import type { CallExpression, Identifier, Node, PropertyAssignment } from 'types
 import consola from 'consola'
 import { isReferenceObject } from 'openapi3-ts/oas31'
 import { addSyntheticLeadingComment, factory, isCallExpression, NodeFlags, SyntaxKind } from 'typescript'
+import { schemaPrefix } from '../constants'
 import utils from '../utils'
 
 /**
@@ -142,7 +143,7 @@ function createZodExpression(
 ): CallExpression | Identifier {
   if (isReferenceObject(obj)) {
     const name = obj.$ref.split('/').pop() ?? ''
-    return factory.createIdentifier(utils.toCamelcase(name))
+    return factory.createIdentifier(utils.toCamelcase(`${schemaPrefix}_${name}`))
   }
 
   const createBaseExpression = () => {

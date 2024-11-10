@@ -6,6 +6,7 @@ import {
   type PathsObject,
   type SchemaObject,
 } from 'openapi3-ts/oas31'
+import { pathPrefix, queryPrefix } from '../constants'
 import utils from '../utils'
 import ast from './ast'
 
@@ -51,7 +52,7 @@ export class PathParser {
         const schema = this.toSchemas(operationObject, 'path')
         if (schema) {
           const statement = ast.createZodVariableStatement(
-            utils.toCamelcase(`${operationId}_${method}_path`),
+            utils.toCamelcase(`${pathPrefix}_${method}_${operationId}`),
             schema,
           )
           nodes.push(statement)
@@ -76,7 +77,7 @@ export class PathParser {
         const schema = this.toSchemas(operationObject, 'query')
         if (schema) {
           const statement = ast.createZodVariableStatement(
-            utils.toCamelcase(`${operationId}_${method}_query`),
+            utils.toCamelcase(`${queryPrefix}_${method}_${operationId}`),
             schema,
           )
           nodes.push(statement)
