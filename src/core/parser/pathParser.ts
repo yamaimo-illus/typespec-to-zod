@@ -28,7 +28,7 @@ export class PathParser {
         }
       }
       else {
-        consola.log('[PathParser]: ReferenceObject not supported.', parameter)
+        consola.warn('[PathParser]: ReferenceObject is not supported.', parameter)
       }
     }
 
