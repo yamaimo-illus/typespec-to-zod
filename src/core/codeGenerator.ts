@@ -125,22 +125,25 @@ export class CodeGenerator {
     if (this.openApiObject.components) {
       if (this.generateComponents) {
         const nodes = this.componentParser.toAst(this.openApiObject.components)
-        nodes[0] = ast.addMultiLineComment(componentsComment, nodes[0])
-
+        if (nodes.length > 0) {
+          nodes[0] = ast.addMultiLineComment(componentsComment, nodes[0])
+        }
         outputNodes.push(...nodes)
       }
     }
     if (this.openApiObject.paths) {
       if (this.generatePaths) {
         const nodes = this.pathParser.toAstPath(this.openApiObject.paths)
-        nodes[0] = ast.addMultiLineComment(pathsComment, nodes[0])
-
+        if (nodes.length > 0) {
+          nodes[0] = ast.addMultiLineComment(pathsComment, nodes[0])
+        }
         outputNodes.push(...nodes)
       }
       if (this.generateQueries) {
         const nodes = this.pathParser.toAstQuey(this.openApiObject.paths)
-        nodes[0] = ast.addMultiLineComment(queriesComment, nodes[0])
-
+        if (nodes.length > 0) {
+          nodes[0] = ast.addMultiLineComment(queriesComment, nodes[0])
+        }
         outputNodes.push(...nodes)
       }
     }
