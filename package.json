@@ -1,0 +1,54 @@
+{
+  "name": "@yamaimo-illus/typespec-to-zod",
+  "type": "module",
+  "version": "0.1.0",
+  "packageManager": "npm@10.9.0",
+  "description": "Zod schema generator via TypeSpec-generated yaml",
+  "license": "MIT",
+  "repository": "yamaimo-illus/typespec-to-zod",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "typespec-to-zod": "./dist/index.cjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "unbuild",
+    "prepack": "unbuild",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "citty": "^0.1.6",
+    "consola": "^3.2.3",
+    "openapi3-ts": "^4.4.0",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^3.8.0",
+    "@types/node": "^22.9.0",
+    "eslint": "^9.14.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "unbuild": "^2.0.0",
+    "zod": "^3.23.8"
+  },
+  "volta": {
+    "node": "23.1.0"
+  }
+}
