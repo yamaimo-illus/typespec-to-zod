@@ -1,8 +1,22 @@
 # typespec-to-zod
 
-**typespec-to-zod** is a tool for generating Zod schemas from YAML files produced by TypeSpec.
+**typespec-to-zod** is a command-line tool designed to generate Zod schemas from YAML files produced by TypeSpec.
 
-It facilitates the transformation of type specifications into working Zod schemas seamlessly.
+It seamlessly transforms type specifications into fully-functional Zod schemas, making it easier for developers to validate data structures.
+
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [Command-line Options](#command-line-options)
+- [Supported TypeSpec Built-in Types](#supported-typespec-built-in-types)
+  - [Numeric Types](#numeric-types)
+  - [Date and Time Types](#date-and-time-types)
+  - [Other Core Types](#other-core-types)
+  - [String Types](#string-types)
+- [Supported TypeSpec Decorators](#supported-typespec-decorators)
+- [Supported TypeSpec Format Decorators](#supported-typespec-format-decorators)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Getting Started
 
@@ -13,6 +27,8 @@ typespec-to-zod -i example/openapi.yaml -o example/openapi.ts -c true -p true -q
 ```
 
 ## Command-line options
+
+The tool supports a variety of command-line options to customize the output:
 
 | Options            | Description                                |
 |--------------------|--------------------------------------------|
@@ -27,6 +43,8 @@ typespec-to-zod -i example/openapi.yaml -o example/openapi.ts -c true -p true -q
 See [Built-in types | TypeSpec](https://typespec.io/docs/language-basics/built-in-types).
 
 ### Numeric types
+
+These are the mappings from TypeSpec numeric types to Zod:
 
 | TypeSpec Type  |  Zod Type Conversion  |
 |----------------|-----------------------|
@@ -46,6 +64,8 @@ See [Built-in types | TypeSpec](https://typespec.io/docs/language-basics/built-i
 | float64        | z.number()            |
 | decimal        | z.number()            |
 | decimal128     | z.number()            |
+
+Example TypeSpec:
 
 ```tsp
 model NumericTypes {
@@ -68,6 +88,8 @@ model NumericTypes {
 }
 ```
 
+Example Zod Schema:
+
 ```ts
 export const schemaNumericTypes = z.object({
   numericProperty: z.number(),
@@ -89,7 +111,9 @@ export const schemaNumericTypes = z.object({
 })
 ```
 
-## Date and time types
+## Date and Time types
+
+These types involve conversions that consider date and time formatting:
 
 | TypeSpec Type  |  Zod Type Conversion  |
 |----------------|-----------------------|
@@ -98,6 +122,8 @@ export const schemaNumericTypes = z.object({
 | utcDateTime    | z.string().datetime() |
 | offsetDateTime | z.string().datetime() |
 | duration       | z.string().duration   |
+
+Example TypeSpec:
 
 ```tsp
 model DateAndTimeTypes {
@@ -108,6 +134,8 @@ model DateAndTimeTypes {
   durationProperty: duration;
 }
 ```
+
+Example Zod Schema:
 
 ```ts
 export const schemaDateAndTimeTypes = z.object({
@@ -121,6 +149,8 @@ export const schemaDateAndTimeTypes = z.object({
 
 ## Other core types
 
+These are additional core types and their mappings:
+
 | TypeSpec Type     |  Zod Type Conversion                     |
 |-------------------|------------------------------------------|
 | bytes             | Not supported but generate as z.string() |
@@ -132,6 +162,8 @@ export const schemaDateAndTimeTypes = z.object({
 | unknown           | z.unknown()                              |
 | void              | NOT SUPPORTED                            |
 | never             | NOT SUPPORTED                            |
+
+Example TypeSpec:
 
 ```tsp
 model OtherCoreTypes {
@@ -147,6 +179,8 @@ model OtherCoreTypes {
 }
 ```
 
+Example Zod Schema:
+
 ```ts
 export const schemaOtherCoreTypes = z.object({
   bytesProperty: z.string(),
@@ -161,15 +195,21 @@ export const schemaOtherCoreTypes = z.object({
 
 ## String types
 
+The tool also supports string-specific types and their conversions:
+
 | TypeSpec Type  |  Zod Type Conversion |
 |----------------|----------------------|
 | url            | z.string().url()     |
+
+Example TypeSpec:
 
 ```tsp
 model StringTypes {
   urlProperty: url;
 }
 ```
+
+Example Zod Schema:
 
 ```ts
 export const schemaStringTypes = z.object({
@@ -179,7 +219,7 @@ export const schemaStringTypes = z.object({
 
 ## Supported TypeSpec Decorators
 
-The following TypeSpec decorators are transformed into equivalent Zod constraints.
+These decorators in TypeSpec can be converted to specific constraints in Zod schemas:
 
 | TypeSpec Decorator  | Zod Type Conversion |
 |---------------------|---------------------|
@@ -191,6 +231,8 @@ The following TypeSpec decorators are transformed into equivalent Zod constraint
 | @maxValue()         | .lte()              |
 | @exclusiveMinimum() | .gt()               |
 | @exclusiveMaximum() | .lt()               |
+
+Example TypeSpec with Decorators:
 
 ```tsp
 model TypeSpecDecorators {
@@ -213,6 +255,8 @@ model TypeSpecDecorators {
 
 ```
 
+Example Zod Schema:
+
 ```ts
 export const schemaTypeSpecDecorators = z.object({
   items: z.array(z.string()).min(1).max(5),
@@ -224,7 +268,7 @@ export const schemaTypeSpecDecorators = z.object({
 
 ## Supported TypeSpec Format Decorators
 
-The following TypeSpec formats are converted into Zod formats.
+These format decorators in TypeSpec can be converted to specific constraints in Zod schemas:
 
 | TypeSpec Format      | Zod Type Conversion |
 |----------------------|---------------------|
