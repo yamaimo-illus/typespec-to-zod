@@ -97,6 +97,7 @@ type ZodType =
   | 'enum'
   | 'object'
   | 'union'
+  | 'record'
 
 /**
  * Creates a TypeScript property access expression for a specified zod type.
@@ -156,6 +157,25 @@ function createZodExpression(
           obj.enum.map(e => factory.createStringLiteral(String(e))),
           false,
         )],
+      )
+    }
+    // Record type
+    if (obj.additionalProperties) {
+      const additionalProperties = typeof obj.additionalProperties === 'boolean'
+        ? createZodTypeExpression('boolean')
+        : createZodExpression(obj.additionalProperties)
+
+      return factory.createCallExpression(
+        createZodTypeExpression('record'),
+        undefined,
+        [
+          factory.createCallExpression(
+            createZodTypeExpression('string'),
+            undefined,
+            [],
+          ),
+          additionalProperties,
+        ],
       )
     }
     // Union type
@@ -320,6 +340,7 @@ function addFormat(obj: SchemaObject, callExpression: CallExpression): CallExpre
     'uint8': 'int',
     'date-time': 'datetime',
     'date': 'date',
+    'time': 'time',
     'duration': 'duration',
     'ip': 'ip',
     'email': 'email',
@@ -327,6 +348,7 @@ function addFormat(obj: SchemaObject, callExpression: CallExpression): CallExpre
     'cuid': 'cuid',
     'cuid2': 'cuid2',
     'url': 'url',
+    'uri': 'url',
   }
 
   const formatIdentifier = formatMap[format]
@@ -418,33 +440,28 @@ function addNullish(required: boolean, callExpression: CallExpression): CallExpr
  * @returns A new CallExpression with the constraints applied.
  */
 function addConstraints(obj: SchemaObject, callExpression: CallExpression): CallExpression {
-  const constraints: Record<string, string> = {
-    maxItems: 'max',
-    minItems: 'min',
-    maxLength: 'max',
-    minLength: 'min',
-    maximum: 'lte',
-    minimum: 'gte',
-    exclusiveMaximum: 'lt',
-    exclusiveMinimum: 'gt',
-  }
+  const constraints = [
+    { prop: 'minItems', method: 'min' },
+    { prop: 'maxItems', method: 'max' },
+    { prop: 'minLength', method: 'min' },
+    { prop: 'maxLength', method: 'max' },
+    { prop: 'minimum', method: obj.exclusiveMinimum ? 'gt' : 'gte' },
+    { prop: 'maximum', method: obj.exclusiveMaximum ? 'lt' : 'lte' },
+  ]
 
-  let updatedExpression = callExpression
-  for (const [key, methodName] of Object.entries(constraints)) {
-    const constraintValue = (obj as any)[key]
-    if (constraintValue !== undefined) {
-      updatedExpression = factory.createCallExpression(
+  return constraints.reduce((expr, { prop, method }) => {
+    if ((obj as any)[prop]) {
+      return factory.createCallExpression(
         factory.createPropertyAccessExpression(
-          updatedExpression,
-          factory.createIdentifier(methodName),
+          expr,
+          factory.createIdentifier(method),
         ),
         undefined,
-        [factory.createNumericLiteral(constraintValue)],
+        [factory.createNumericLiteral((obj as any)[prop])],
       )
     }
-  }
-
-  return updatedExpression
+    return expr
+  }, callExpression)
 }
 
 function addMerge(obj: SchemaObject, callExpression: CallExpression): CallExpression {

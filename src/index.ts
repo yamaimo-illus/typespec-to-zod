@@ -23,21 +23,21 @@ const main = defineCommand({
       description: 'Output .ts path',
       required: true,
     },
-    generateComponents: {
+    components: {
       type: 'boolean',
       alias: ['c'],
       description: 'Generate components',
       required: false,
       default: true,
     },
-    generatePaths: {
+    paths: {
       type: 'boolean',
       alias: ['p'],
       description: 'Generate paths',
       required: false,
       default: false,
     },
-    generateQueries: {
+    queries: {
       type: 'boolean',
       alias: ['q'],
       description: 'Generate queries',
@@ -50,9 +50,9 @@ const main = defineCommand({
 
     const codeGenerator = new CodeGenerator(
       fileManager,
-      args.generateComponents,
-      args.generatePaths,
-      args.generateQueries,
+      args.components,
+      args.paths,
+      args.queries,
     )
     codeGenerator.generate()
   },
