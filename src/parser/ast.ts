@@ -449,7 +449,7 @@ function addConstraints(obj: SchemaObject, callExpression: CallExpression): Call
 
 function addMerge(obj: SchemaObject, callExpression: CallExpression): CallExpression {
   const allOf = obj.allOf
-  if (!allOf || allOf.length === 0) {
+  if (!allOf?.length) {
     return callExpression
   }
 
