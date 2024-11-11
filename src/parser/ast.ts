@@ -185,8 +185,10 @@ function createZodExpression(
       case 'object':
       {
         const properties = obj.properties
-          ? Object.entries(obj.properties).map(([name, child]) =>
-            createZodPropertyStatement(name, child, obj.required?.includes(name) ?? false),
+          ? Object.entries(obj.properties).map(([name, child]) => {
+            const required = obj.required?.includes(name) ?? false
+            return createZodPropertyStatement(name, child, required)
+          },
           )
           : []
         return factory.createCallExpression(

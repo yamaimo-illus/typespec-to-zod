@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { defineCommand, runMain } from 'citty'
 import packageJson from '../package.json'
-import { CodeGenerator } from './core/codeGenerator.js'
-import { FileManager } from './core/fileManager.js'
+import { CodeGenerator } from './codeGenerator.js'
+import { FileManager } from './fileManager.js'
 
 const main = defineCommand({
   meta: {

@@ -3,7 +3,9 @@ import consola from 'consola'
 import {
   isReferenceObject,
   type OperationObject,
+  type ParameterObject,
   type PathsObject,
+  type ReferenceObject,
   type SchemaObject,
 } from 'openapi3-ts/oas31'
 import { pathPrefix, queryPrefix } from '../constants'
@@ -11,6 +13,10 @@ import utils from '../utils'
 import ast from './ast'
 
 const methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']
+
+function isParameterObject(object: ReferenceObject | ParameterObject): object is ParameterObject {
+  return !isReferenceObject(object)
+}
 
 export class PathParser {
   private toSchemas(
@@ -21,7 +27,7 @@ export class PathParser {
     const schema: SchemaObject = { type: 'object', properties: {} }
 
     for (const parameter of parameters) {
-      if (!isReferenceObject(parameter)) {
+      if (isParameterObject(parameter)) {
         const name = parameter.name
         if (parameter.schema && parameter.in === inType) {
           schema.properties![name] = parameter.schema

@@ -9,8 +9,9 @@ export class ComponentParser {
     const nodes: Node[] = []
 
     if (componentsObject.schemas) {
-      for (const [name, obj] of Object.entries(componentsObject.schemas)) {
-        const statement = ast.createZodVariableStatement(utils.toCamelcase(`${schemaPrefix}_${name}`), obj)
+      for (const [name, schema] of Object.entries(componentsObject.schemas)) {
+        const variableName = utils.toCamelcase(`${schemaPrefix}_${name}`)
+        const statement = ast.createZodVariableStatement(variableName, schema)
         nodes.push(statement)
       }
     }
