@@ -88,7 +88,7 @@ model NumericTypes {
 }
 ```
 
-Example Zod Schema:
+Generated Zod schema:
 
 ```ts
 export const schemaNumericTypes = z.object({
@@ -135,7 +135,7 @@ model DateAndTimeTypes {
 }
 ```
 
-Example Zod Schema:
+Generated Zod schema:
 
 ```ts
 export const schemaDateAndTimeTypes = z.object({
@@ -179,7 +179,7 @@ model OtherCoreTypes {
 }
 ```
 
-Example Zod Schema:
+Generated Zod schema:
 
 ```ts
 export const schemaOtherCoreTypes = z.object({
@@ -209,7 +209,7 @@ model StringTypes {
 }
 ```
 
-Example Zod Schema:
+Generated Zod schema:
 
 ```ts
 export const schemaStringTypes = z.object({
@@ -252,10 +252,9 @@ model TypeSpecDecorators {
   @maxValueExclusive(5)
   count: int16;
 }
-
 ```
 
-Example Zod Schema:
+Generated Zod schema:
 
 ```ts
 export const schemaTypeSpecDecorators = z.object({
