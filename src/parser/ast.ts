@@ -160,7 +160,7 @@ function createZodExpression(
       )
     }
     // Record type
-    if (obj.additionalProperties) {
+    if (obj.additionalProperties !== undefined) {
       const additionalProperties = typeof obj.additionalProperties === 'boolean'
         ? createZodTypeExpression('boolean')
         : createZodExpression(obj.additionalProperties)
