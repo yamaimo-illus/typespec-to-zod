@@ -109,9 +109,10 @@ export class CodeGenerator {
     schema.anyOf = schema.anyOf?.map(obj => this.toPureSchemaObject(openApiObject, obj))
     schema.oneOf = schema.oneOf?.map(obj => this.toPureSchemaObject(openApiObject, obj))
     schema.items = schema.items ? this.toPureSchemaObject(openApiObject, schema.items) : undefined
-    schema.additionalProperties = isReferenceObject(schema.additionalProperties)
-      ? this.toPureSchemaObject(openApiObject, schema.additionalProperties)
-      : undefined
+    schema.additionalProperties
+      = schema.additionalProperties && isReferenceObject(schema.additionalProperties)
+        ? this.toPureSchemaObject(openApiObject, schema.additionalProperties)
+        : undefined
 
     const newProperties = schema.properties ?? {}
     for (const name in schema.properties) {
