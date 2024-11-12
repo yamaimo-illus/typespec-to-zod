@@ -232,7 +232,7 @@ These decorators in TypeSpec can be converted to specific constraints in Zod sch
 | @exclusiveMinimum() | .gt()               |
 | @exclusiveMaximum() | .lt()               |
 
-Example TypeSpec with Decorators:
+Example TypeSpec:
 
 ```tsp
 model TypeSpecDecorators {
@@ -282,6 +282,30 @@ These format decorators in TypeSpec can be converted to specific constraints in 
 | @format("cuid2")     | .cuid2()            |
 | @format("uri")       | .url()              |
 | @format("url")       | .url()              |
+
+## Extended Syntax for Doc Decorator
+
+By using the `zod:` identifier within a doc comment, you can instruct the `typespec-to-zod` tool to generate Zod schemas with specific requirements.
+
+This feature provides greater flexibility and control over the validation rules directly from the TypeSpec model.
+
+Example TypeSpec:
+
+```tsp
+model ExtendedSyntaxForDocDecorator {
+  @doc("Username zod: z.string().min(2, { message: 'Must be 2 or more characters long' })")
+  name: string;
+}
+```
+
+Generated Zod schema:
+
+```ts
+export const schemaExtendedSyntaxForDocDecorator = z.object({
+  // Username
+  name: z.string().min(2, { message: 'Must be 2 or more characters long' })
+})
+```
 
 ## Contributing
 
