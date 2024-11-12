@@ -15,6 +15,7 @@ It seamlessly transforms type specifications into fully-functional Zod schemas, 
   - [String Types](#string-types)
 - [Supported TypeSpec Decorators](#supported-typespec-decorators)
 - [Supported TypeSpec Format Decorators](#supported-typespec-format-decorators)
+- [Extended Syntax for Doc Decorator](#extended-syntax-for-doc-decorator)
 - [Contributing](#contributing)
 - [License](#license)
 
