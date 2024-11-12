@@ -452,21 +452,22 @@ function addConstraints(obj: SchemaObject, callExpression: CallExpression): Call
     { prop: 'maximum', method: obj.exclusiveMaximum ? 'lt' : 'lte' },
   ]
 
-  return constraints.reduce((expr, { prop, method }) => {
-    if ((obj as any)[prop]) {
-      return factory.createCallExpression(
+  let currentExpression = callExpression
+  for (const { prop, method } of constraints) {
+    if ((obj as any)[prop] !== undefined) {
+      currentExpression = factory.createCallExpression(
         factory.createPropertyAccessExpression(
-          expr,
+          currentExpression,
           factory.createIdentifier(method),
         ),
         undefined,
         [factory.createNumericLiteral((obj as any)[prop])],
       )
     }
-    return expr
-  }, callExpression)
-}
+  }
 
+  return currentExpression
+}
 function addMerge(obj: SchemaObject, callExpression: CallExpression): CallExpression {
   const allOf = obj.allOf
   if (!allOf?.length) {

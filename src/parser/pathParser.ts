@@ -58,7 +58,7 @@ export class PathParser {
         const schema = this.toSchemas(operationObject, 'path')
         if (schema) {
           const statement = ast.createZodVariableStatement(
-            utils.toCamelcase(`${pathPrefix}_${method}_${operationId}`),
+            utils.toCamelcase(`${pathPrefix}_${operationId}`),
             schema,
           )
           nodes.push(statement)
@@ -83,7 +83,7 @@ export class PathParser {
         const schema = this.toSchemas(operationObject, 'query')
         if (schema) {
           const statement = ast.createZodVariableStatement(
-            utils.toCamelcase(`${queryPrefix}_${method}_${operationId}`),
+            utils.toCamelcase(`${queryPrefix}_${operationId}`),
             schema,
           )
           nodes.push(statement)
