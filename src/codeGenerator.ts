@@ -52,6 +52,9 @@ export class CodeGenerator {
     const children = [...obj.allOf ?? [], ...obj.anyOf ?? [], ...obj.oneOf ?? []]
     obj.items && children.push(obj.items)
 
+    if (obj.additionalProperties && isReferenceObject(obj.additionalProperties)) {
+      return true
+    }
     for (const child of children) {
       if (isReferenceObject(child) || this.hasReferenceObject(child)) {
         return true
@@ -106,6 +109,9 @@ export class CodeGenerator {
     schema.anyOf = schema.anyOf?.map(obj => this.toPureSchemaObject(openApiObject, obj))
     schema.oneOf = schema.oneOf?.map(obj => this.toPureSchemaObject(openApiObject, obj))
     schema.items = schema.items ? this.toPureSchemaObject(openApiObject, schema.items) : undefined
+    schema.additionalProperties = isReferenceObject(schema.additionalProperties)
+      ? this.toPureSchemaObject(openApiObject, schema.additionalProperties)
+      : undefined
 
     const newProperties = schema.properties ?? {}
     for (const name in schema.properties) {

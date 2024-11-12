@@ -159,25 +159,28 @@ function createZodExpression(
         )],
       )
     }
-    // Record type
-    if (obj.additionalProperties !== undefined) {
-      const additionalProperties = typeof obj.additionalProperties === 'boolean'
-        ? createZodTypeExpression('boolean')
-        : createZodExpression(obj.additionalProperties)
 
-      return factory.createCallExpression(
-        createZodTypeExpression('record'),
-        undefined,
-        [
-          factory.createCallExpression(
-            createZodTypeExpression('string'),
-            undefined,
-            [],
-          ),
-          additionalProperties,
-        ],
-      )
-    }
+    // TODO: Support record type
+    // // Record type
+    // if (obj.additionalProperties !== undefined) {
+    //   const additionalProperties = typeof obj.additionalProperties === 'boolean'
+    //     ? createZodTypeExpression('boolean')
+    //     : createZodExpression(obj.additionalProperties)
+
+    //   return factory.createCallExpression(
+    //     createZodTypeExpression('record'),
+    //     undefined,
+    //     [
+    //       factory.createCallExpression(
+    //         createZodTypeExpression('string'),
+    //         undefined,
+    //         [],
+    //       ),
+    //       additionalProperties,
+    //     ],
+    //   )
+    // }
+
     // Union type
     if (obj.anyOf || obj.oneOf) {
       const target = [...obj?.anyOf ?? [], ...obj?.oneOf ?? []]

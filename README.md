@@ -151,17 +151,17 @@ export const schemaDateAndTimeTypes = z.object({
 
 These are additional core types and their mappings:
 
-| TypeSpec Type     |  Zod Type Conversion                     |
-|-------------------|------------------------------------------|
-| bytes             | Not supported but generate as z.string() |
-| string            | z.string()                               |
-| boolean           | z.boolean()                              |
-| null              | z.unknown()                              |
-| Array\<Element\>  | z.array(z.Element())                     |
-| Record\<Element\> | z.record(z.string(), z.Element())        |
-| unknown           | z.unknown()                              |
-| void              | NOT SUPPORTED                            |
-| never             | NOT SUPPORTED                            |
+| TypeSpec Type     |  Zod Type Conversion                           |
+|-------------------|------------------------------------------------|
+| bytes             | Not supported but it generated as z.string()   |
+| string            | z.string()                                     |
+| boolean           | z.boolean()                                    |
+| null              | z.unknown()                                    |
+| Array\<Element\>  | z.array(z.Element())                           |
+| Record\<Element\> | Not supported but it generated as z.object({}) |
+| unknown           | z.unknown()                                    |
+| void              | NOT SUPPORTED                                  |
+| never             | NOT SUPPORTED                                  |
 
 Example TypeSpec:
 
@@ -174,8 +174,8 @@ model OtherCoreTypes {
   ArrayProperty: numeric[];
   recordProperty: Record<numeric>;
   unknownProperty: unknown;
-  // voidProperty: void; NOT SUPPORTED
-  // neverProperty: never; NOT SUPPORTED
+  // voidProperty: void; Not Supported
+  // neverProperty: never; Not Supported
 }
 ```
 
