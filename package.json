@@ -4,8 +4,18 @@
   "version": "0.1.0",
   "packageManager": "npm@10.9.0",
   "description": "Zod schema generator via TypeSpec-generated yaml",
+  "author": "yamaimo-illus",
   "license": "MIT",
-  "repository": "yamaimo-illus/typespec-to-zod",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yamaimo-illus/typespec-to-zod.git"
+  },
+  "keywords": [
+    "typespec",
+    "zod",
+    "typescript",
+    "ts"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,6 +23,7 @@
       "require": "./dist/index.cjs"
     }
   },
+  "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "bin": {

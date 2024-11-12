@@ -16,6 +16,7 @@
     "@typespec/compiler": "latest",
     "@typespec/http": "latest",
     "@typespec/openapi3": "latest",
-    "@typespec/rest": "latest"
+    "@typespec/rest": "latest",
+    "@yamaimo-illus/typespec-to-zod": "latest"
   }
 }
