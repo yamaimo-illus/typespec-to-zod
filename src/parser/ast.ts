@@ -1,10 +1,11 @@
 import type { ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
 import type { CallExpression, Identifier, Node, PropertyAssignment } from 'typescript'
+import { EOL } from 'node:os'
 import consola from 'consola'
 import { isReferenceObject } from 'openapi3-ts/oas31'
-import { addSyntheticLeadingComment, factory, isCallExpression, NodeFlags, SyntaxKind } from 'typescript'
+import * as ts from 'typescript'
 import { schemaPrefix } from '../constants'
-import utils from '../utils'
+import utils from './utils'
 
 /**
  * Adds a leading comment to a given TypeScript node.
@@ -20,9 +21,9 @@ function addSingleLineComment<T extends Node>(comment: string | undefined, node:
   // Ensure the comment does not include any newline characters that could break the syntax.
   const sanitizedComment = comment.replace(/\r?\n|\r/g, '')
 
-  return addSyntheticLeadingComment(
+  return ts.addSyntheticLeadingComment(
     node,
-    SyntaxKind.SingleLineCommentTrivia,
+    ts.SyntaxKind.SingleLineCommentTrivia,
     ` ${sanitizedComment}`,
     true,
   )
@@ -42,9 +43,9 @@ function addMultiLineComment<T extends Node>(comment: string | undefined, node: 
   // Ensure the comment does not include any characters that could disrupt the comment syntax.
   const sanitizedComment = comment.replace(/\*\//g, '*\\/')
 
-  return addSyntheticLeadingComment(
+  return ts.addSyntheticLeadingComment(
     node,
-    SyntaxKind.MultiLineCommentTrivia,
+    ts.SyntaxKind.MultiLineCommentTrivia,
     ` ${sanitizedComment}`,
     true,
   )
@@ -61,16 +62,16 @@ function addMultiLineComment<T extends Node>(comment: string | undefined, node: 
  * ```
  */
 function createZodImportDeclaration() {
-  return factory.createImportDeclaration(
+  return ts.factory.createImportDeclaration(
     undefined,
-    factory.createImportClause(
+    ts.factory.createImportClause(
       false,
       undefined,
-      factory.createNamedImports([
-        factory.createImportSpecifier(false, undefined, factory.createIdentifier('z')),
+      ts.factory.createNamedImports([
+        ts.factory.createImportSpecifier(false, undefined, ts.factory.createIdentifier('z')),
       ]),
     ),
-    factory.createStringLiteral('zod'),
+    ts.factory.createStringLiteral('zod'),
     undefined,
   )
 }
@@ -116,9 +117,9 @@ type ZodType =
  * ```
  */
 function createZodTypeExpression(type: ZodType) {
-  return factory.createPropertyAccessExpression(
-    factory.createIdentifier('z'),
-    factory.createIdentifier(type),
+  return ts.factory.createPropertyAccessExpression(
+    ts.factory.createIdentifier('z'),
+    ts.factory.createIdentifier(type),
   )
 }
 
@@ -144,17 +145,17 @@ function createZodExpression(
 ): CallExpression | Identifier {
   if (isReferenceObject(obj)) {
     const name = obj.$ref.split('/').pop() ?? ''
-    return factory.createIdentifier(utils.toCamelcase(`${schemaPrefix}_${name}`))
+    return ts.factory.createIdentifier(utils.toCamelcase(`${schemaPrefix}_${name}`))
   }
 
   const createBaseExpression = () => {
     // Enum type
     if (obj.enum) {
-      return factory.createCallExpression(
+      return ts.factory.createCallExpression(
         createZodTypeExpression('enum'),
         undefined,
-        [factory.createArrayLiteralExpression(
-          obj.enum.map(e => factory.createStringLiteral(String(e))),
+        [ts.factory.createArrayLiteralExpression(
+          obj.enum.map(e => ts.factory.createStringLiteral(String(e))),
           false,
         )],
       )
@@ -167,11 +168,11 @@ function createZodExpression(
     //     ? createZodTypeExpression('boolean')
     //     : createZodExpression(obj.additionalProperties)
 
-    //   return factory.createCallExpression(
+    //   return ts.factory.createCallExpression(
     //     createZodTypeExpression('record'),
     //     undefined,
     //     [
-    //       factory.createCallExpression(
+    //       ts.factory.createCallExpression(
     //         createZodTypeExpression('string'),
     //         undefined,
     //         [],
@@ -186,21 +187,21 @@ function createZodExpression(
       const target = [...obj?.anyOf ?? [], ...obj?.oneOf ?? []]
       const unionTypes = target.map(obj => createZodExpression(obj))
 
-      return factory.createCallExpression(
+      return ts.factory.createCallExpression(
         createZodTypeExpression('union'),
         undefined,
-        [factory.createArrayLiteralExpression(unionTypes, false)],
+        [ts.factory.createArrayLiteralExpression(unionTypes, false)],
       )
     }
     // Extended notation for description
     if (utils.isDocExtendedNotation(obj.description)) {
       const schemaExpression = utils.extractZodSchemaFromDescription(obj.description)
-      return factory.createIdentifier(schemaExpression)
+      return ts.factory.createIdentifier(schemaExpression)
     }
 
     switch (obj.type) {
       case 'array':
-        return factory.createCallExpression(
+        return ts.factory.createCallExpression(
           createZodTypeExpression('array'),
           undefined,
           [obj.items ? createZodExpression(obj.items) : createZodTypeExpression('unknown')],
@@ -214,15 +215,15 @@ function createZodExpression(
           },
           )
           : []
-        return factory.createCallExpression(
+        return ts.factory.createCallExpression(
           createZodTypeExpression('object'),
           undefined,
-          [factory.createObjectLiteralExpression(properties, true)],
+          [ts.factory.createObjectLiteralExpression(properties, true)],
         )
       }
       case 'integer':
       case 'number':
-        return factory.createCallExpression(
+        return ts.factory.createCallExpression(
           createZodTypeExpression('number'),
           undefined,
           [],
@@ -230,13 +231,13 @@ function createZodExpression(
       case 'boolean':
       case 'null':
       case 'string':
-        return factory.createCallExpression(
+        return ts.factory.createCallExpression(
           createZodTypeExpression(obj.type),
           undefined,
           [],
         )
       default:
-        return factory.createCallExpression(
+        return ts.factory.createCallExpression(
           createZodTypeExpression('unknown'),
           undefined,
           [],
@@ -245,7 +246,7 @@ function createZodExpression(
   }
 
   let expression = createBaseExpression()
-  if (isCallExpression(expression)) {
+  if (ts.isCallExpression(expression)) {
     expression = addMerge(obj, expression)
     expression = addFormat(obj, expression)
     expression = addConstraints(obj, expression)
@@ -275,8 +276,8 @@ function createZodPropertyStatement(
   obj: SchemaObject | ReferenceObject,
   required: boolean = true,
 ): PropertyAssignment {
-  const assignment = factory.createPropertyAssignment(
-    factory.createIdentifier(identifier),
+  const assignment = ts.factory.createPropertyAssignment(
+    ts.factory.createIdentifier(identifier),
     createZodExpression(obj, required),
   )
   const description = utils.removeZodSchemaFromDescription(obj.description)
@@ -300,16 +301,16 @@ function createZodPropertyStatement(
  * ```
  */
 function createZodVariableStatement(variableName: string, obj: SchemaObject | ReferenceObject) {
-  const statement = factory.createVariableStatement(
-    [factory.createToken(SyntaxKind.ExportKeyword)],
-    factory.createVariableDeclarationList(
-      [factory.createVariableDeclaration(
-        factory.createIdentifier(variableName),
+  const statement = ts.factory.createVariableStatement(
+    [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+    ts.factory.createVariableDeclarationList(
+      [ts.factory.createVariableDeclaration(
+        ts.factory.createIdentifier(variableName),
         undefined,
         undefined,
         createZodExpression(obj),
       )],
-      NodeFlags.Const,
+      ts.NodeFlags.Const,
     ),
   )
   const description = utils.removeZodSchemaFromDescription(obj.description)
@@ -360,10 +361,10 @@ function addFormat(obj: SchemaObject, callExpression: CallExpression): CallExpre
     return callExpression
   }
 
-  return factory.createCallExpression(
-    factory.createPropertyAccessExpression(
+  return ts.factory.createCallExpression(
+    ts.factory.createPropertyAccessExpression(
       callExpression,
-      factory.createIdentifier(formatIdentifier),
+      ts.factory.createIdentifier(formatIdentifier),
     ),
     undefined,
     [],
@@ -387,26 +388,26 @@ function addDefault(obj: SchemaObject, callExpression: CallExpression): CallExpr
     const type = typeof v
     switch (type) {
       case 'string':
-        return factory.createStringLiteral(v)
+        return ts.factory.createStringLiteral(v)
       case 'number':
-        return factory.createNumericLiteral(v)
+        return ts.factory.createNumericLiteral(v)
       case 'bigint':
-        return factory.createBigIntLiteral(v)
+        return ts.factory.createBigIntLiteral(v)
       case 'boolean':
-        return v ? factory.createTrue() : factory.createFalse()
+        return v ? ts.factory.createTrue() : ts.factory.createFalse()
       default:
-        return factory.createNull()
+        return ts.factory.createNull()
     }
   }
 
   const argumentNode = Array.isArray(defaultValue)
-    ? factory.createArrayLiteralExpression(defaultValue.map(v => toLiteral(v)))
+    ? ts.factory.createArrayLiteralExpression(defaultValue.map(v => toLiteral(v)))
     : toLiteral(defaultValue)
 
-  return factory.createCallExpression(
-    factory.createPropertyAccessExpression(
+  return ts.factory.createCallExpression(
+    ts.factory.createPropertyAccessExpression(
       callExpression,
-      factory.createIdentifier('default'),
+      ts.factory.createIdentifier('default'),
     ),
     undefined,
     [argumentNode],
@@ -425,10 +426,10 @@ function addNullish(required: boolean, callExpression: CallExpression): CallExpr
     return callExpression
   }
 
-  return factory.createCallExpression(
-    factory.createPropertyAccessExpression(
+  return ts.factory.createCallExpression(
+    ts.factory.createPropertyAccessExpression(
       callExpression,
-      factory.createIdentifier('nullish'),
+      ts.factory.createIdentifier('nullish'),
     ),
     undefined,
     [],
@@ -455,19 +456,20 @@ function addConstraints(obj: SchemaObject, callExpression: CallExpression): Call
   let currentExpression = callExpression
   for (const { prop, method } of constraints) {
     if ((obj as any)[prop] !== undefined) {
-      currentExpression = factory.createCallExpression(
-        factory.createPropertyAccessExpression(
+      currentExpression = ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(
           currentExpression,
-          factory.createIdentifier(method),
+          ts.factory.createIdentifier(method),
         ),
         undefined,
-        [factory.createNumericLiteral((obj as any)[prop])],
+        [ts.factory.createNumericLiteral((obj as any)[prop])],
       )
     }
   }
 
   return currentExpression
 }
+
 function addMerge(obj: SchemaObject, callExpression: CallExpression): CallExpression {
   const allOf = obj.allOf
   if (!allOf?.length) {
@@ -479,10 +481,10 @@ function addMerge(obj: SchemaObject, callExpression: CallExpression): CallExpres
     const schemaExpression = createZodExpression(schema)
 
     if (utils.isObjectExpression(callExpression)) {
-      mergedExpression = factory.createCallExpression(
-        factory.createPropertyAccessExpression(
+      mergedExpression = ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(
           mergedExpression,
-          factory.createIdentifier('merge'),
+          ts.factory.createIdentifier('merge'),
         ),
         undefined,
         [schemaExpression],
@@ -494,6 +496,14 @@ function addMerge(obj: SchemaObject, callExpression: CallExpression): CallExpres
   }
 
   return mergedExpression as CallExpression
+}
+
+function printAst(ast: Node[]) {
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+  const file = ts.createSourceFile('', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS)
+  const result = ast.map(node => printer.printNode(ts.EmitHint.Unspecified, node, file))
+
+  return result.join(EOL + EOL)
 }
 
 export default {
@@ -509,4 +519,5 @@ export default {
   addNullish,
   addConstraints,
   addMerge,
+  printAst,
 }

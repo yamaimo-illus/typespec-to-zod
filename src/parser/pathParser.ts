@@ -9,8 +9,8 @@ import {
   type SchemaObject,
 } from 'openapi3-ts/oas31'
 import { pathPrefix, queryPrefix } from '../constants'
-import utils from '../utils'
 import ast from './ast'
+import utils from './utils'
 
 const methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']
 
