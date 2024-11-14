@@ -1,28 +1,27 @@
 import type { OpenAPIObject } from 'openapi3-ts/oas31'
 import fs from 'node:fs'
+import { Validator } from '@seriousme/openapi-schema-validator'
 import consola from 'consola'
-import { parse } from 'yaml'
 
 export class FileManager {
-  public openApiObject: OpenAPIObject
   constructor(
     private readonly inputPath: string,
     private readonly outputPath: string,
-  ) {
-    this.openApiObject = this.load(this.inputPath)
+  ) { }
 
-    // TODO: validate yaml
-  }
-
-  private load(input: string) {
-    const file = fs.readFileSync(input, 'utf-8')
-    return parse(file)
+  public async load() {
+    const validator = new Validator()
+    const res = await validator.validate(this.inputPath)
+    if (!res.valid) {
+      throw res.errors
+    }
+    return validator.resolveRefs() as OpenAPIObject
   }
 
   public write(output: string) {
     try {
       fs.writeFileSync(this.outputPath, output, 'utf-8')
-      consola.success(`Data successfully written to ${this.outputPath}`)
+      consola.success(`Successfully written to ${this.outputPath}`)
     }
     catch (e) {
       consola.error(`Failed to write data to ${this.outputPath}:`, e)

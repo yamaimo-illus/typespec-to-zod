@@ -1,54 +1,37 @@
-import type { ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
-import type { CallExpression, Identifier, Node, PropertyAssignment } from 'typescript'
+import type { ComponentsObject, ParameterObject, ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
+import type { CallExpression, Identifier, Node } from 'typescript'
 import { EOL } from 'node:os'
 import consola from 'consola'
-import { isReferenceObject } from 'openapi3-ts/oas31'
+import { isReferenceObject, isSchemaObject } from 'openapi3-ts/oas31'
 import * as ts from 'typescript'
-import { schemaPrefix } from '../constants'
+import c from '../constants'
 import utils from './utils'
 
 /**
- * Adds a leading comment to a given TypeScript node.
+ * Adds a single-line or multi-line comment to a given TypeScript node.
  *
  * @param comment - The text of the comment to be added.
+ * @param line - Specifies whether the comment is 'single' or 'multiple'.
  * @param node - The TypeScript AST node to which the comment will be added.
  * @returns The node with the added comment.
  */
-function addSingleLineComment<T extends Node>(comment: string | undefined, node: T) {
+function addComment<T extends Node>(
+  comment: string | undefined,
+  line: 'single' | 'multiple',
+  node: T,
+) {
   if (!comment) {
     return node
   }
-  // Ensure the comment does not include any newline characters that could break the syntax.
-  const sanitizedComment = comment.replace(/\r?\n|\r/g, '')
+  const kind = line === 'single'
+    ? ts.SyntaxKind.SingleLineCommentTrivia
+    : ts.SyntaxKind.MultiLineCommentTrivia
 
-  return ts.addSyntheticLeadingComment(
-    node,
-    ts.SyntaxKind.SingleLineCommentTrivia,
-    ` ${sanitizedComment}`,
-    true,
-  )
-}
+  const text = line === 'single'
+    ? ` ${comment.replace(/\r?\n|\r/g, '')}`
+    : ` ${comment.replace(/\*\//g, '*\\/')}`
 
-/**
- * Adds a multiline comment to a given TypeScript node.
- *
- * @param comment - The text of the comment to be added.
- * @param node - The TypeScript AST node to which the comment will be added.
- * @returns The node with the added comment.
- */
-function addMultiLineComment<T extends Node>(comment: string | undefined, node: T): T {
-  if (!comment) {
-    return node
-  }
-  // Ensure the comment does not include any characters that could disrupt the comment syntax.
-  const sanitizedComment = comment.replace(/\*\//g, '*\\/')
-
-  return ts.addSyntheticLeadingComment(
-    node,
-    ts.SyntaxKind.MultiLineCommentTrivia,
-    ` ${sanitizedComment}`,
-    true,
-  )
+  return ts.addSyntheticLeadingComment(node, kind, text, true)
 }
 
 /**
@@ -61,7 +44,7 @@ function addMultiLineComment<T extends Node>(comment: string | undefined, node: 
  * import { z } from "zod"
  * ```
  */
-function createZodImportDeclaration() {
+function createZodImportAst() {
   return ts.factory.createImportDeclaration(
     undefined,
     ts.factory.createImportClause(
@@ -109,14 +92,14 @@ type ZodType =
  *
  * @example
  * ```ts
- * createZodTypeExpression('string')
+ * createZodPropertyAccessAst('string')
  * // z.string()
  *
- * createZodTypeExpression('array')
+ * createZodPropertyAccessAst('array')
  * // z.array()
  * ```
  */
-function createZodTypeExpression(type: ZodType) {
+function createZodPropertyAccessAst(type: ZodType) {
   return ts.factory.createPropertyAccessExpression(
     ts.factory.createIdentifier('z'),
     ts.factory.createIdentifier(type),
@@ -126,7 +109,7 @@ function createZodTypeExpression(type: ZodType) {
 /**
  * Creates a zod expression based on a given OpenAPI schema object.
  *
- * @param obj - The schema object or reference object.
+ * @param object - The schema object or reference object.
  * @param required - Indicates if the property is required (default is true).
  * @returns A CallExpression or Identifier representing the zod schema.
  *
@@ -139,23 +122,23 @@ function createZodTypeExpression(type: ZodType) {
  * })
  * ```
  */
-function createZodExpression(
-  obj: SchemaObject | ReferenceObject,
+function createZodSchemaAst(
+  object: SchemaObject | ReferenceObject,
   required: boolean = true,
 ): CallExpression | Identifier {
-  if (isReferenceObject(obj)) {
-    const name = obj.$ref.split('/').pop() ?? ''
-    return ts.factory.createIdentifier(utils.toCamelcase(`${schemaPrefix}_${name}`))
+  if (isReferenceObject(object)) {
+    const name = object.$ref.split('/').pop() ?? ''
+    return ts.factory.createIdentifier(utils.toCamelcase(`${c.SCHEMA_PREFIX}_${name}`))
   }
 
   const createBaseExpression = () => {
     // Enum type
-    if (obj.enum) {
+    if (object.enum) {
       return ts.factory.createCallExpression(
-        createZodTypeExpression('enum'),
+        createZodPropertyAccessAst('enum'),
         undefined,
         [ts.factory.createArrayLiteralExpression(
-          obj.enum.map(e => ts.factory.createStringLiteral(String(e))),
+          object.enum.map(e => ts.factory.createStringLiteral(String(e))),
           false,
         )],
       )
@@ -163,17 +146,17 @@ function createZodExpression(
 
     // TODO: Support record type
     // // Record type
-    // if (obj.additionalProperties !== undefined) {
-    //   const additionalProperties = typeof obj.additionalProperties === 'boolean'
-    //     ? createZodTypeExpression('boolean')
-    //     : createZodExpression(obj.additionalProperties)
+    // if (object.additionalProperties !== undefined) {
+    //   const additionalProperties = typeof object.additionalProperties === 'boolean'
+    //     ? createZodPropertyAccessAst('boolean')
+    //     : createZodSchemaAst(object.additionalProperties)
 
     //   return ts.factory.createCallExpression(
-    //     createZodTypeExpression('record'),
+    //     createZodPropertyAccessAst('record'),
     //     undefined,
     //     [
     //       ts.factory.createCallExpression(
-    //         createZodTypeExpression('string'),
+    //         createZodPropertyAccessAst('string'),
     //         undefined,
     //         [],
     //       ),
@@ -183,40 +166,40 @@ function createZodExpression(
     // }
 
     // Union type
-    if (obj.anyOf || obj.oneOf) {
-      const target = [...obj?.anyOf ?? [], ...obj?.oneOf ?? []]
-      const unionTypes = target.map(obj => createZodExpression(obj))
+    if (object.anyOf || object.oneOf) {
+      const target = [...object?.anyOf ?? [], ...object?.oneOf ?? []]
+      const unionTypes = target.map(object => createZodSchemaAst(object))
 
       return ts.factory.createCallExpression(
-        createZodTypeExpression('union'),
+        createZodPropertyAccessAst('union'),
         undefined,
         [ts.factory.createArrayLiteralExpression(unionTypes, false)],
       )
     }
     // Extended notation for description
-    if (utils.isDocExtendedNotation(obj.description)) {
-      const schemaExpression = utils.extractZodSchemaFromDescription(obj.description)
+    if (isDocExtendedNotation(object.description)) {
+      const schemaExpression = extractZodSchemaFromDescription(object.description)
       return ts.factory.createIdentifier(schemaExpression)
     }
 
-    switch (obj.type) {
+    switch (object.type) {
       case 'array':
         return ts.factory.createCallExpression(
-          createZodTypeExpression('array'),
+          createZodPropertyAccessAst('array'),
           undefined,
-          [obj.items ? createZodExpression(obj.items) : createZodTypeExpression('unknown')],
+          [object.items ? createZodSchemaAst(object.items) : createZodPropertyAccessAst('unknown')],
         )
       case 'object':
       {
-        const properties = obj.properties
-          ? Object.entries(obj.properties).map(([name, child]) => {
-            const required = obj.required?.includes(name) ?? false
-            return createZodPropertyStatement(name, child, required)
+        const properties = object.properties
+          ? Object.entries(object.properties).map(([name, child]) => {
+            const required = object.required?.includes(name) ?? false
+            return createZodPropertyAssignmentAst(name, child, required)
           },
           )
           : []
         return ts.factory.createCallExpression(
-          createZodTypeExpression('object'),
+          createZodPropertyAccessAst('object'),
           undefined,
           [ts.factory.createObjectLiteralExpression(properties, true)],
         )
@@ -224,7 +207,7 @@ function createZodExpression(
       case 'integer':
       case 'number':
         return ts.factory.createCallExpression(
-          createZodTypeExpression('number'),
+          createZodPropertyAccessAst('number'),
           undefined,
           [],
         )
@@ -232,13 +215,13 @@ function createZodExpression(
       case 'null':
       case 'string':
         return ts.factory.createCallExpression(
-          createZodTypeExpression(obj.type),
+          createZodPropertyAccessAst(object.type),
           undefined,
           [],
         )
       default:
         return ts.factory.createCallExpression(
-          createZodTypeExpression('unknown'),
+          createZodPropertyAccessAst('unknown'),
           undefined,
           [],
         )
@@ -247,11 +230,11 @@ function createZodExpression(
 
   let expression = createBaseExpression()
   if (ts.isCallExpression(expression)) {
-    expression = addMerge(obj, expression)
-    expression = addFormat(obj, expression)
-    expression = addConstraints(obj, expression)
-    expression = addDefault(obj, expression)
-    expression = addNullish(required, expression)
+    expression = applyMergeToZodExpression(object, expression)
+    expression = applyFormatToZodExpression(object, expression)
+    expression = applyConstraintsToZodExpression(object, expression)
+    expression = applyDefaultToZodExpression(object, expression)
+    expression = applyNullishToZodExpression(required, expression)
   }
 
   return expression
@@ -261,7 +244,7 @@ function createZodExpression(
  * Generates a zod property assignment for a given property name and schema.
  *
  * @param identifier - The name of the property.
- * @param obj - The schema object or reference.
+ * @param object - The schema object or reference.
  * @param required - If true, the property is required; otherwise, it's optional.
  * @returns A simplified PropertyAssignment for zod schema generation.
  *
@@ -271,25 +254,25 @@ function createZodExpression(
  * b: z.number()
  * ```
  */
-function createZodPropertyStatement(
+function createZodPropertyAssignmentAst(
   identifier: string,
-  obj: SchemaObject | ReferenceObject,
+  object: SchemaObject | ReferenceObject,
   required: boolean = true,
-): PropertyAssignment {
+) {
   const assignment = ts.factory.createPropertyAssignment(
     ts.factory.createIdentifier(identifier),
-    createZodExpression(obj, required),
+    createZodSchemaAst(object, required),
   )
-  const description = utils.removeZodSchemaFromDescription(obj.description)
+  const description = removeZodSchemaFromDescription(object.description)
 
-  return addSingleLineComment(description, assignment)
+  return addComment(description, 'single', assignment)
 }
 
 /**
  * Creates a variable statement exporting a zod schema.
  *
  * @param variableName - The name of the variable.
- * @param obj - The schema object or reference object.
+ * @param object - The schema object or reference object.
  * @returns A variable statement declaring the zod schema.
  *
  * @example
@@ -300,7 +283,7 @@ function createZodPropertyStatement(
  * })
  * ```
  */
-function createZodVariableStatement(variableName: string, obj: SchemaObject | ReferenceObject) {
+function createZodVariableStatement(variableName: string, object: SchemaObject | ReferenceObject) {
   const statement = ts.factory.createVariableStatement(
     [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
     ts.factory.createVariableDeclarationList(
@@ -308,25 +291,25 @@ function createZodVariableStatement(variableName: string, obj: SchemaObject | Re
         ts.factory.createIdentifier(variableName),
         undefined,
         undefined,
-        createZodExpression(obj),
+        createZodSchemaAst(object),
       )],
       ts.NodeFlags.Const,
     ),
   )
-  const description = utils.removeZodSchemaFromDescription(obj.description)
+  const description = removeZodSchemaFromDescription(object.description)
 
-  return addSingleLineComment(description, statement)
+  return addComment(description, 'single', statement)
 }
 
 /**
  * Adds a format specification to a zod call expression.
  *
- * @param obj - The schema object or reference object.
+ * @param object - The schema object or reference object.
  * @param callExpression - The existing call expression.
  * @returns A new CallExpression with the format applied.
  */
-function addFormat(obj: SchemaObject, callExpression: CallExpression): CallExpression {
-  const format = obj.format
+function applyFormatToZodExpression(object: SchemaObject, callExpression: CallExpression) {
+  const format = object.format
   if (!format) {
     return callExpression
   }
@@ -374,12 +357,12 @@ function addFormat(obj: SchemaObject, callExpression: CallExpression): CallExpre
 /**
  * Adds a default value to a zod call expression.
  *
- * @param obj - The schema object or reference object.
+ * @param object - The schema object or reference object.
  * @param callExpression - The existing call expression.
  * @returns A new CallExpression with the default value applied.
  */
-function addDefault(obj: SchemaObject, callExpression: CallExpression): CallExpression {
-  const defaultValue = obj.default
+function applyDefaultToZodExpression(object: SchemaObject, callExpression: CallExpression) {
+  const defaultValue = object.default
   if (defaultValue === undefined) {
     return callExpression
   }
@@ -421,7 +404,7 @@ function addDefault(obj: SchemaObject, callExpression: CallExpression): CallExpr
  * @param callExpression - The current call expression.
  * @returns The modified CallExpression.
  */
-function addNullish(required: boolean, callExpression: CallExpression): CallExpression {
+function applyNullishToZodExpression(required: boolean, callExpression: CallExpression) {
   if (required) {
     return callExpression
   }
@@ -439,30 +422,30 @@ function addNullish(required: boolean, callExpression: CallExpression): CallExpr
 /**
  * Adds constraints such as min, max, greater than, and less than to a zod call expression.
  *
- * @param obj - An object containing the constraint values.
+ * @param object - An object containing the constraint values.
  * @param callExpression - The existing call expression.
  * @returns A new CallExpression with the constraints applied.
  */
-function addConstraints(obj: SchemaObject, callExpression: CallExpression): CallExpression {
+function applyConstraintsToZodExpression(object: SchemaObject, callExpression: CallExpression) {
   const constraints = [
     { prop: 'minItems', method: 'min' },
     { prop: 'maxItems', method: 'max' },
     { prop: 'minLength', method: 'min' },
     { prop: 'maxLength', method: 'max' },
-    { prop: 'minimum', method: obj.exclusiveMinimum ? 'gt' : 'gte' },
-    { prop: 'maximum', method: obj.exclusiveMaximum ? 'lt' : 'lte' },
+    { prop: 'minimum', method: object.exclusiveMinimum ? 'gt' : 'gte' },
+    { prop: 'maximum', method: object.exclusiveMaximum ? 'lt' : 'lte' },
   ]
 
   let currentExpression = callExpression
   for (const { prop, method } of constraints) {
-    if ((obj as any)[prop] !== undefined) {
+    if ((object as any)[prop] !== undefined) {
       currentExpression = ts.factory.createCallExpression(
         ts.factory.createPropertyAccessExpression(
           currentExpression,
           ts.factory.createIdentifier(method),
         ),
         undefined,
-        [ts.factory.createNumericLiteral((obj as any)[prop])],
+        [ts.factory.createNumericLiteral((object as any)[prop])],
       )
     }
   }
@@ -470,17 +453,17 @@ function addConstraints(obj: SchemaObject, callExpression: CallExpression): Call
   return currentExpression
 }
 
-function addMerge(obj: SchemaObject, callExpression: CallExpression): CallExpression {
-  const allOf = obj.allOf
+function applyMergeToZodExpression(object: SchemaObject, callExpression: CallExpression) {
+  const allOf = object.allOf
   if (!allOf?.length) {
     return callExpression
   }
 
   let mergedExpression: CallExpression | Identifier = callExpression
   for (const schema of allOf) {
-    const schemaExpression = createZodExpression(schema)
+    const schemaExpression = createZodSchemaAst(schema)
 
-    if (utils.isObjectExpression(callExpression)) {
+    if (isObjectExpression(callExpression)) {
       mergedExpression = ts.factory.createCallExpression(
         ts.factory.createPropertyAccessExpression(
           mergedExpression,
@@ -498,26 +481,195 @@ function addMerge(obj: SchemaObject, callExpression: CallExpression): CallExpres
   return mergedExpression as CallExpression
 }
 
+/**
+ * Checks if a schema object or any of its children contain a ReferenceObject.
+ *
+ * @param object - The schema object to check for references.
+ * @returns A boolean indicating if there is a reference object.
+ */
+function hasReferenceObject(object: SchemaObject) {
+  const targets: Record<string, (SchemaObject | ReferenceObject)[]> = {
+    allOf: object.allOf ?? [],
+    anyOf: object.anyOf ?? [],
+    oneOf: object.oneOf ?? [],
+    items: object.items ? [object.items] : [],
+    properties: object.properties ? [...Object.values(object.properties)] : [],
+    additionalProperties: object.additionalProperties
+      ? typeof object.additionalProperties !== 'boolean' ? [object.additionalProperties] : []
+      : [],
+    // TODO: check if `not` in SchemaObject is ReferenceObject
+    // TODO: check if `propertyNames` in SchemaObject is ReferenceObject
+  }
+
+  for (const [_, values] of Object.entries(targets)) {
+    for (const value of values) {
+      if (isReferenceObject(value)) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
+/**
+ * Converts a schema object or a reference object to a pure schema object,
+ * resolving any references recursively.
+ *
+ * @param componentsObject - The full OpenAPI components object containing all schemas.
+ * @param object - The schema or reference object to convert.
+ * @returns The resolved schema object.
+ * @throws If a schema referenced is not found or is itself a reference.
+ */
+function convertReferenceToSchema(
+  componentsObject: ComponentsObject,
+  object: SchemaObject | ReferenceObject,
+) {
+  // The object does not contain any ReferenceObject.
+  if (isSchemaObject(object) && !hasReferenceObject(object)) {
+    return object
+  }
+
+  if (isReferenceObject(object)) {
+    const name = object.$ref.split('/').pop() ?? ''
+    const schema = componentsObject?.schemas?.[name]
+    if (!schema) {
+      throw new Error(`Schema for reference ${object.$ref} not found.`)
+    }
+    return convertReferenceToSchema(componentsObject, schema)
+  }
+  else {
+    // The SchemaObject contains one or more ReferenceObjects.
+    const newObject = Object.assign({}, object)
+    newObject.allOf = newObject.allOf?.map(o => convertReferenceToSchema(componentsObject, o))
+    newObject.anyOf = newObject.anyOf?.map(o => convertReferenceToSchema(componentsObject, o))
+    newObject.oneOf = newObject.oneOf?.map(o => convertReferenceToSchema(componentsObject, o))
+    newObject.items = newObject.items ? convertReferenceToSchema(componentsObject, newObject.items) : undefined
+    newObject.additionalProperties = newObject.additionalProperties && typeof newObject.additionalProperties !== 'boolean'
+      ? convertReferenceToSchema(componentsObject, newObject.additionalProperties)
+      : undefined
+    const newProperties = newObject.properties ?? {}
+    for (const name in newObject.properties) {
+      newProperties[name] = convertReferenceToSchema(componentsObject, newObject.properties[name])
+    }
+    newObject.properties = newProperties
+
+    // TODO: newObject.not
+    // TODO: newObject.propertyNames
+
+    return newObject
+  }
+}
+
+/**
+ * Determines if a given CallExpression represents an object creation.
+ *
+ * This function checks if the call expression corresponds to property access
+ * with the name 'object', indicating the use of an 'object' expression.
+ *
+ * @param callExpression - The CallExpression to evaluate.
+ * @returns True if the CallExpression is an object expression; otherwise, false.
+ */
+function isObjectExpression(callExpression: CallExpression) {
+  const kind = callExpression.expression.kind
+  const text = (callExpression.expression as any)?.name?.text
+  return kind === ts.SyntaxKind.PropertyAccessExpression && text === 'object'
+}
+
+/**
+ * Checks if a description contains an doc extended notation.
+ * The extended notation is recognized if it contains 'zod:' followed by the schema definition.
+ *
+ * @param description - The description string to check.
+ * @returns True if the description contains extended zod notation; otherwise, false.
+ */
+function isDocExtendedNotation(description: string | undefined) {
+  if (!description) {
+    return false
+  }
+  return description.split('zod: ').length >= 2
+}
+
+/**
+ * Type guard to determine if an object is a ParameterObject.
+ *
+ * This function checks if the provided object is a ParameterObject
+ * rather than a ReferenceObject. It does this by checking if the
+ * object is not a ReferenceObject.
+ *
+ * @param object - The object to check, which can be either a ReferenceObject or a ParameterObject.
+ * @returns True if the object is a ParameterObject; otherwise, false.
+ */
+function isParameterObject(object: ReferenceObject | ParameterObject): object is ParameterObject {
+  return !isReferenceObject(object)
+}
+
+/**
+ * Extracts the Zod schema portion from a documentation's extended notation.
+ * The extended notation is recognized if it contains 'zod:' followed by the schema definition.
+ *
+ * @param description - The description string containing the Zod extended notation.
+ * @returns The extracted Zod schema as a string if available; otherwise, an empty string.
+ *
+ * @example
+ * ```ts
+ * const description = "This is an example description. zod: string().min(1)"
+ * const extracted = extractZodSchemaFromDescription(description)
+ * // -> "string().min(1)"
+ * ```
+ */
+function extractZodSchemaFromDescription(description: string | undefined) {
+  const parts = description?.split('zod: ') ?? ''
+  return parts.length < 2 ? '' : parts[1].trim()
+}
+
+/**
+ * Removes the Zod schema from the description and returns the remaining string.
+ *
+ * @param description - The description string containing the Zod extended notation.
+ * @returns The description without the Zod schema portion.
+ *
+ * @example
+ * ```ts
+ * const description = "This is an example description. zod: string().min(1)"
+ * const result = removeZodSchemaFromDescription(description)
+ * // -> "This is an example description."
+ * ```
+ */
+function removeZodSchemaFromDescription(description: string | undefined) {
+  return description?.split('zod: ')[0].trim() ?? ''
+}
+
+/**
+ * Prints an array of TypeScript AST nodes as strings.
+ *
+ * @param ast - An array of TypeScript AST nodes to be printed.
+ * @returns A string representation of the given AST nodes.
+ */
 function printAst(ast: Node[]) {
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
   const file = ts.createSourceFile('', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS)
   const result = ast.map(node => printer.printNode(ts.EmitHint.Unspecified, node, file))
-
   return result.join(EOL + EOL)
 }
 
 export default {
-  addSingleLineComment,
-  addMultiLineComment,
-  createZodImportDeclaration,
-  createZodTypeExpression,
-  createZodExpression,
-  createZodPropertyStatement,
+  addComment,
+  createZodImportAst,
+  createZodPropertyAccessAst,
+  createZodSchemaAst,
+  createZodPropertyAssignmentAst,
   createZodVariableStatement,
-  addFormat,
-  addDefault,
-  addNullish,
-  addConstraints,
-  addMerge,
+  applyFormatToZodExpression,
+  applyDefaultToZodExpression,
+  applyNullishToZodExpression,
+  applyConstraintsToZodExpression,
+  applyMergeToZodExpression,
+  hasReferenceObject,
+  convertReferenceToSchema,
+  isObjectExpression,
+  isDocExtendedNotation,
+  isParameterObject,
+  extractZodSchemaFromDescription,
+  removeZodSchemaFromDescription,
   printAst,
 }

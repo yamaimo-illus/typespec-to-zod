@@ -45,11 +45,13 @@ const main = defineCommand({
       default: false,
     },
   },
-  run({ args }) {
+  run: async ({ args }) => {
     const fileManager = new FileManager(args.input, args.output)
+    const openApiObject = await fileManager.load()
 
     const codeGenerator = new CodeGenerator(
-      fileManager,
+      openApiObject,
+      output => fileManager.write(output),
       args.components,
       args.paths,
       args.queries,

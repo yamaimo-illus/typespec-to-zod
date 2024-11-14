@@ -1,8 +1,8 @@
-export const schemaPrefix = 'schema'
-export const pathPrefix = 'path'
-export const queryPrefix = 'query'
+const SCHEMA_PREFIX = 'schema'
+const PATH_PREFIX = 'path'
+const QUERY_PREFIX = 'query'
 
-export const componentsComment
+const COMPONENTS_COMMENT
   = `
  ██████╗ ██████╗ ███╗   ███╗██████╗  ██████╗ ███╗   ██╗███████╗███╗   ██╗████████╗███████╗
 ██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔═══██╗████╗  ██║██╔════╝████╗  ██║╚══██╔══╝██╔════╝
@@ -12,7 +12,7 @@ export const componentsComment
  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝
 `
 
-export const pathsComment
+const PATHS_COMMENT
   = `
 ██████╗  █████╗ ████████╗██╗  ██╗███████╗
 ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║██╔════╝
@@ -22,7 +22,7 @@ export const pathsComment
 ╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
 `
 
-export const queriesComment
+const QUERIES_COMMENT
   = `
  ██████╗ ██╗   ██╗███████╗██████╗ ██╗███████╗███████╗
 ██╔═══██╗██║   ██║██╔════╝██╔══██╗██║██╔════╝██╔════╝
@@ -31,3 +31,12 @@ export const queriesComment
 ╚██████╔╝╚██████╔╝███████╗██║  ██║██║███████╗███████║
  ╚══▀▀═╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝
 `
+
+export default {
+  SCHEMA_PREFIX,
+  PATH_PREFIX,
+  QUERY_PREFIX,
+  COMPONENTS_COMMENT,
+  PATHS_COMMENT,
+  QUERIES_COMMENT,
+}

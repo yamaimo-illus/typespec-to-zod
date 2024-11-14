@@ -45,6 +45,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@seriousme/openapi-schema-validator": "^2.2.5",
     "citty": "^0.1.6",
     "consola": "^3.2.3",
     "openapi3-ts": "^4.4.0",
