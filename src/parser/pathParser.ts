@@ -1,33 +1,19 @@
+import type { OperationObject, PathsObject, SchemaObject } from 'openapi3-ts/oas31'
 import type { Node } from 'typescript'
 import consola from 'consola'
-import {
-  isReferenceObject,
-  type OperationObject,
-  type ParameterObject,
-  type PathsObject,
-  type ReferenceObject,
-  type SchemaObject,
-} from 'openapi3-ts/oas31'
-import { pathPrefix, queryPrefix } from '../constants'
-import utils from '../utils'
+import c from '../constants'
 import ast from './ast'
+import utils from './utils'
 
 const methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']
 
-function isParameterObject(object: ReferenceObject | ParameterObject): object is ParameterObject {
-  return !isReferenceObject(object)
-}
-
 export class PathParser {
-  private toSchemas(
-    operationObject: OperationObject,
-    inType: 'path' | 'query',
-  ) {
+  private toSchemas(operationObject: OperationObject, inType: 'path' | 'query') {
     const parameters = operationObject.parameters ?? []
     const schema: SchemaObject = { type: 'object', properties: {} }
 
     for (const parameter of parameters) {
-      if (isParameterObject(parameter)) {
+      if (ast.isParameterObject(parameter)) {
         const name = parameter.name
         if (parameter.schema && parameter.in === inType) {
           schema.properties![name] = parameter.schema
@@ -58,7 +44,7 @@ export class PathParser {
         const schema = this.toSchemas(operationObject, 'path')
         if (schema) {
           const statement = ast.createZodVariableStatement(
-            utils.toCamelcase(`${pathPrefix}_${operationId}`),
+            utils.toCamelcase(`${c.PATH_PREFIX}_${operationId}`),
             schema,
           )
           nodes.push(statement)
@@ -83,7 +69,7 @@ export class PathParser {
         const schema = this.toSchemas(operationObject, 'query')
         if (schema) {
           const statement = ast.createZodVariableStatement(
-            utils.toCamelcase(`${queryPrefix}_${operationId}`),
+            utils.toCamelcase(`${c.QUERY_PREFIX}_${operationId}`),
             schema,
           )
           nodes.push(statement)
