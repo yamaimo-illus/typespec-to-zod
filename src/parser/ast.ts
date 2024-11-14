@@ -1,5 +1,5 @@
 import type { ComponentsObject, ParameterObject, ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
-import type { CallExpression, Identifier, Node } from 'typescript'
+import type { CallExpression, Identifier, Node, ObjectLiteralElementLike, PropertyAssignment } from 'typescript'
 import { EOL } from 'node:os'
 import consola from 'consola'
 import { isReferenceObject, isSchemaObject } from 'openapi3-ts/oas31'
@@ -355,6 +355,15 @@ function applyDefaultToZodExpression(object: SchemaObject, callExpression: CallE
         return ts.factory.createBigIntLiteral(v)
       case 'boolean':
         return v ? ts.factory.createTrue() : ts.factory.createFalse()
+      case 'object': {
+        const properties: ObjectLiteralElementLike[] = Object.keys(v).map((key) => {
+          return ts.factory.createPropertyAssignment(
+            ts.factory.createIdentifier(key),
+            toLiteral(v[key]),
+          )
+        })
+        return ts.factory.createObjectLiteralExpression(properties, true)
+      }
       default:
         return ts.factory.createNull()
     }
@@ -536,7 +545,6 @@ function convertReferenceToSchema(
   if (isSchemaObject(object) && !hasReferenceObject(object)) {
     return object
   }
-
   if (isReferenceObject(object)) {
     const name = getSchemaNameFromRef(object.$ref)
     const schema = componentsObject?.schemas?.[name]
