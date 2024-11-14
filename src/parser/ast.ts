@@ -7,31 +7,8 @@ import * as ts from 'typescript'
 import c from '../constants'
 import utils from './utils'
 
-/**
- * Adds a single-line or multi-line comment to a given TypeScript node.
- *
- * @param comment - The text of the comment to be added.
- * @param line - Specifies whether the comment is 'single' or 'multiple'.
- * @param node - The TypeScript AST node to which the comment will be added.
- * @returns The node with the added comment.
- */
-function addComment<T extends Node>(
-  comment: string | undefined,
-  line: 'single' | 'multiple',
-  node: T,
-) {
-  if (!comment) {
-    return node
-  }
-  const kind = line === 'single'
-    ? ts.SyntaxKind.SingleLineCommentTrivia
-    : ts.SyntaxKind.MultiLineCommentTrivia
-
-  const text = line === 'single'
-    ? ` ${comment.replace(/\r?\n|\r/g, '')}`
-    : ` ${comment.replace(/\*\//g, '*\\/')}`
-
-  return ts.addSyntheticLeadingComment(node, kind, text, true)
+function getSchemaNameFromRef($ref: string) {
+  return $ref.split('/').pop() ?? ''
 }
 
 /**
@@ -127,7 +104,7 @@ function createZodSchemaAst(
   required: boolean = true,
 ): CallExpression | Identifier {
   if (isReferenceObject(object)) {
-    const name = object.$ref.split('/').pop() ?? ''
+    const name = getSchemaNameFromRef(object.$ref)
     return ts.factory.createIdentifier(utils.toCamelcase(`${c.SCHEMA_PREFIX}_${name}`))
   }
 
@@ -265,7 +242,7 @@ function createZodPropertyAssignmentAst(
   )
   const description = removeZodSchemaFromDescription(object.description)
 
-  return addComment(description, 'single', assignment)
+  return applyComment(description, 'single', assignment)
 }
 
 /**
@@ -298,7 +275,7 @@ function createZodVariableStatement(variableName: string, object: SchemaObject |
   )
   const description = removeZodSchemaFromDescription(object.description)
 
-  return addComment(description, 'single', statement)
+  return applyComment(description, 'single', statement)
 }
 
 /**
@@ -453,6 +430,13 @@ function applyConstraintsToZodExpression(object: SchemaObject, callExpression: C
   return currentExpression
 }
 
+/**
+ * Merges additional schemas into a given Zod call expression using the `merge` method.
+ *
+ * @param object - The OpenAPI schema object which may contain an `allOf` array.
+ * @param callExpression - The existing Zod call expression that may be merged with additional schemas.
+ * @returns A new CallExpression representing the result of merging the provided schemas.
+ */
 function applyMergeToZodExpression(object: SchemaObject, callExpression: CallExpression) {
   const allOf = object.allOf
   if (!allOf?.length) {
@@ -479,6 +463,30 @@ function applyMergeToZodExpression(object: SchemaObject, callExpression: CallExp
   }
 
   return mergedExpression as CallExpression
+}
+
+/**
+ * Applies a comment to a given TypeScript AST node.
+ *
+ * @template T - The type of the AST node, extending from the base Node type.
+ * @param comment - The comment text to be added. If undefined, no comment is added.
+ * @param line - Specifies the type of comment: 'single' for single-line or 'multiple' for multi-line.
+ * @param node - The TypeScript AST node to which the comment will be applied.
+ * @returns The modified AST node with the comment applied.
+ */
+function applyComment<T extends Node>(comment: string, line: 'single' | 'multiple', node: T) {
+  if (!comment) {
+    return node
+  }
+  const kind = line === 'single'
+    ? ts.SyntaxKind.SingleLineCommentTrivia
+    : ts.SyntaxKind.MultiLineCommentTrivia
+
+  const text = line === 'single'
+    ? ` ${comment.replace(/\r?\n|\r/g, '')}`
+    : ` ${comment.replace(/\*\//g, '*\\/')}`
+
+  return ts.addSyntheticLeadingComment(node, kind, text, true)
 }
 
 /**
@@ -530,7 +538,7 @@ function convertReferenceToSchema(
   }
 
   if (isReferenceObject(object)) {
-    const name = object.$ref.split('/').pop() ?? ''
+    const name = getSchemaNameFromRef(object.$ref)
     const schema = componentsObject?.schemas?.[name]
     if (!schema) {
       throw new Error(`Schema for reference ${object.$ref} not found.`)
@@ -653,7 +661,6 @@ function printAst(ast: Node[]) {
 }
 
 export default {
-  addComment,
   createZodImportAst,
   createZodPropertyAccessAst,
   createZodSchemaAst,
@@ -664,6 +671,7 @@ export default {
   applyNullishToZodExpression,
   applyConstraintsToZodExpression,
   applyMergeToZodExpression,
+  applyComment,
   hasReferenceObject,
   convertReferenceToSchema,
   isObjectExpression,

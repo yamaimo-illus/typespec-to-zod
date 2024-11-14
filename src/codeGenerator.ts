@@ -51,7 +51,7 @@ export class CodeGenerator {
       if (this.generateComponents) {
         const nodes = this.componentParser.toAst(this.openApiObject.components)
         if (nodes.length > 0) {
-          nodes[0] = ast.addComment(c.COMPONENTS_COMMENT, 'multiple', nodes[0])
+          nodes[0] = ast.applyComment(c.COMPONENTS_COMMENT, 'multiple', nodes[0])
         }
         outputNodes.push(...nodes)
       }
@@ -62,14 +62,14 @@ export class CodeGenerator {
       if (this.generatePaths) {
         const nodes = this.pathParser.toAstPath(this.openApiObject.paths)
         if (nodes.length > 0) {
-          nodes[0] = ast.addComment(c.PATHS_COMMENT, 'multiple', nodes[0])
+          nodes[0] = ast.applyComment(c.PATHS_COMMENT, 'multiple', nodes[0])
         }
         outputNodes.push(...nodes)
       }
       if (this.generateQueries) {
         const nodes = this.pathParser.toAstQuey(this.openApiObject.paths)
         if (nodes.length > 0) {
-          nodes[0] = ast.addComment(c.QUERIES_COMMENT, 'multiple', nodes[0])
+          nodes[0] = ast.applyComment(c.QUERIES_COMMENT, 'multiple', nodes[0])
         }
         outputNodes.push(...nodes)
       }
