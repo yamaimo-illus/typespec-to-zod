@@ -1,5 +1,5 @@
 import type { ComponentsObject, ParameterObject, ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
-import type { CallExpression, Identifier, Node, ObjectLiteralElementLike, PropertyAssignment } from 'typescript'
+import type { CallExpression, Identifier, Node, ObjectLiteralElementLike } from 'typescript'
 import { EOL } from 'node:os'
 import consola from 'consola'
 import { isReferenceObject, isSchemaObject } from 'openapi3-ts/oas31'

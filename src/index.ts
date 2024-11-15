@@ -28,7 +28,7 @@ const main = defineCommand({
       alias: ['c'],
       description: 'Generate components',
       required: false,
-      default: true,
+      default: false,
     },
     paths: {
       type: 'boolean',
