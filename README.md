@@ -24,20 +24,20 @@ It seamlessly transforms type specifications into fully-functional Zod schemas, 
 Below is an example of how to execute the tool.
 
 ```sh
-typespec-to-zod -i example/openapi.yaml -o example/openapi.ts -c true -p true -q true
+typespec-to-zod -i example/openapi.yaml -o example/openapi.ts -c -p -q
 ```
 
 ## Command-line options
 
 The tool supports a variety of command-line options to customize the output:
 
-| Options            | Description                                |
-|--------------------|--------------------------------------------|
-| `-i, --input`      | Path to the OpenAPI YAML file.             |
-| `-o, --output`     | Output file path for the generated schema. |
-| `-c, --components` | Flag to generate components.               |
-| `-p, --paths`      | Flag to generate paths.                    |
-| `-q, --queries`    | Flag to generate queries.                  |
+| Options            | Description                                | Default |
+|--------------------|--------------------------------------------|---------|
+| `-i, --input`      | Path to the OpenAPI YAML file.             | N/A     |
+| `-o, --output`     | Output file path for the generated schema. | N/A     |
+| `-c, --components` | Flag to generate components.               | false   |
+| `-p, --paths`      | Flag to generate paths.                    | false   |
+| `-q, --queries`    | Flag to generate queries.                  | false   |
 
 ## Supported TypeSpec built-in types
 
