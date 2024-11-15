@@ -1,27 +1,10 @@
 # typespec-to-zod
 
-**typespec-to-zod** is a command-line tool designed to generate Zod schemas from YAML files produced by TypeSpec.
+This library is effortlessly converts YAML from TypeSpec into Zod schemas.
 
-It seamlessly transforms type specifications into fully-functional Zod schemas, making it easier for developers to validate data structures.
+## Usage
 
-## Table of Contents
-
-- [Getting Started](#getting-started)
-- [Command-line Options](#command-line-options)
-- [Supported TypeSpec Built-in Types](#supported-typespec-built-in-types)
-  - [Numeric Types](#numeric-types)
-  - [Date and Time Types](#date-and-time-types)
-  - [Other Core Types](#other-core-types)
-  - [String Types](#string-types)
-- [Supported TypeSpec Decorators](#supported-typespec-decorators)
-- [Supported TypeSpec Format Decorators](#supported-typespec-format-decorators)
-- [Extended Syntax for Doc Decorator](#extended-syntax-for-doc-decorator)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Getting Started
-
-Below is an example of how to execute the tool.
+Provide the CLI with the input/output file path and additional options as shown below.
 
 ```sh
 typespec-to-zod -i example/openapi.yaml -o example/openapi.ts -c -p -q
