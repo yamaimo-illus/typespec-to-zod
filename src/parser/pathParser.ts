@@ -5,22 +5,20 @@ import c from '../constants'
 import ast from './ast'
 import utils from './utils'
 
-const methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']
-
 export class PathParser {
+  private methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']
+
   private toSchemas(operationObject: OperationObject, inType: 'path' | 'query') {
     const parameters = operationObject.parameters ?? []
     const schema: SchemaObject = { type: 'object', properties: {} }
 
     for (const parameter of parameters) {
-      if (ast.isParameterObject(parameter)) {
-        const name = parameter.name
-        if (parameter.schema && parameter.in === inType) {
-          schema.properties![name] = parameter.schema
-        }
+      if (!ast.isParameterObject(parameter)) {
+        consola.warn('[PathParser]: ReferenceObject is not supported.', parameter.$ref)
+        continue
       }
-      else {
-        consola.warn('[PathParser]: ReferenceObject is not supported.', parameter)
+      if (parameter.schema && parameter.in === inType) {
+        schema.properties![parameter.name] = parameter.schema
       }
     }
 
@@ -33,13 +31,12 @@ export class PathParser {
     const nodes: Node[] = []
 
     for (const [_path, pathItemObject] of Object.entries(pathsObject)) {
-      for (const method of methods) {
+      for (const method of this.methods) {
         const key = method as keyof typeof pathItemObject
         const operationObject: OperationObject | undefined = pathItemObject[key]
         if (!operationObject) {
           continue
         }
-
         const operationId = operationObject.operationId
         const schema = this.toSchemas(operationObject, 'path')
         if (schema) {
@@ -58,13 +55,12 @@ export class PathParser {
     const nodes: Node[] = []
 
     for (const [_path, pathItemObject] of Object.entries(pathsObject)) {
-      for (const method of methods) {
+      for (const method of this.methods) {
         const key = method as keyof typeof pathItemObject
         const operationObject: OperationObject | undefined = pathItemObject[key]
         if (!operationObject) {
           continue
         }
-
         const operationId = operationObject.operationId
         const schema = this.toSchemas(operationObject, 'query')
         if (schema) {
