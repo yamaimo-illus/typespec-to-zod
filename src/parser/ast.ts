@@ -669,6 +669,7 @@ function printAst(ast: Node[]) {
 }
 
 export default {
+  getSchemaNameFromRef,
   createZodImportAst,
   createZodPropertyAccessAst,
   createZodSchemaAst,
