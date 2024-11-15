@@ -9,7 +9,6 @@
  * toCamelcase('hello world');       // returns 'helloWorld'
  * toCamelcase('HelloWorld');        // returns 'helloWorld'
  * toCamelcase('hello-world');       // returns 'helloWorld'
- * toCamelcase('HELLO_WORLD');       // returns 'helloWorld'
  */
 function toCamelcase(text: string): string {
   return text
