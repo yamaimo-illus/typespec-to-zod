@@ -1,7 +1,7 @@
 {
   "name": "@yamaimo-illus/typespec-to-zod",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "packageManager": "npm@10.9.0",
   "description": "Zod schema generator via TypeSpec-generated yaml",
   "author": "yamaimo-illus",
