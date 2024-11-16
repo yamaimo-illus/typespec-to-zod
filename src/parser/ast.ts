@@ -1,4 +1,4 @@
-import type { ComponentsObject, ParameterObject, ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
+import type { ComponentsObject, OpenAPIObject, ParameterObject, ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
 import type { CallExpression, Identifier, Node, ObjectLiteralElementLike } from 'typescript'
 import { EOL } from 'node:os'
 import consola from 'consola'
@@ -8,6 +8,9 @@ import c from '../constants'
 import utils from './utils'
 
 function getSchemaNameFromRef($ref: string) {
+  if (!$ref.startsWith('#/components/schemas')) {
+    consola.warn('$ref does not start with the expected path `#/components/schemas`.')
+  }
   return $ref.split('/').pop() ?? ''
 }
 
@@ -317,7 +320,6 @@ function applyFormatToZodExpression(object: SchemaObject, callExpression: CallEx
 
   const formatIdentifier = formatMap[format]
   if (!formatIdentifier) {
-    consola.warn(`[Format] ${format} is not supported`)
     return callExpression
   }
 
@@ -577,6 +579,25 @@ function convertReferenceToSchema(
 }
 
 /**
+ * Resolves all schema references within the OpenAPI object,
+ * replacing each $ref with the pure schema object.
+ *
+ * @returns A new OpenAPIObject with resolved schema references.
+ */
+function resolveSchemaReferences(openApiObject: OpenAPIObject) {
+  const result = { ...openApiObject }
+
+  if (result.components?.schemas) {
+    for (const name in result.components.schemas) {
+      const schema = result.components.schemas[name]
+      result.components.schemas[name] = convertReferenceToSchema(openApiObject, schema)
+    }
+  }
+
+  return result
+}
+
+/**
  * Determines if a given CallExpression represents an object creation.
  *
  * This function checks if the call expression corresponds to property access
@@ -683,6 +704,7 @@ export default {
   applyComment,
   hasReferenceObject,
   convertReferenceToSchema,
+  resolveSchemaReferences,
   isObjectExpression,
   isDocExtendedNotation,
   isParameterObject,

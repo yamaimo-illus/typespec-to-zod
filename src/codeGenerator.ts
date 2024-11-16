@@ -18,26 +18,7 @@ export class CodeGenerator {
   ) {
     this.componentParser = new ComponentParser()
     this.pathParser = new PathParser()
-    this.openApiObject = this.resolveSchemaReferences()
-  }
-
-  /**
-   * Resolves all schema references within the OpenAPI object,
-   * replacing each $ref with the pure schema object.
-   *
-   * @returns A new OpenAPIObject with resolved schema references.
-   */
-  private resolveSchemaReferences() {
-    const openApiObject = { ...this.openApiObject }
-
-    if (openApiObject.components?.schemas) {
-      for (const name in openApiObject.components.schemas) {
-        const schema = openApiObject.components.schemas[name]
-        openApiObject.components.schemas[name] = ast.convertReferenceToSchema(openApiObject, schema)
-      }
-    }
-
-    return openApiObject
+    this.openApiObject = ast.resolveSchemaReferences(openApiObject)
   }
 
   public generate() {
