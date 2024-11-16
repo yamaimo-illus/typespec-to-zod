@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import utils from '../../src/parser/utils'
+import utils from '../src/parser/utils'
 
 describe('parser/utils', () => {
   it('converts various string formats to camelCase', () => {
