@@ -3,12 +3,13 @@ import { defineConfig } from 'tsup'
 export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm'],
+  outDir: './dist',
   splitting: false,
   sourcemap: false,
   clean: true,
   minify: true,
   /**
-   * Workaround for Dynamic require of "" is not supported
+   * Workaround for Dynamic require of "x" is not supported
    *
    * @see https://github.com/egoist/tsup/issues/927
    */

@@ -1,13 +1,7 @@
 {
   "extends": "@tsconfig/node22/tsconfig.json", // Extend base Node.js v22 TypeScript configuration
   "compilerOptions": {
-    "resolveJsonModule": true, // Enable importing JSON files as modules
-    "declaration": true, // Generate .d.ts files
-    "declarationMap": true, // Generate sourcemaps for .d.ts files
-    "noEmit": true, // Don't emit files
-    "noEmitOnError": true, // Don't emit on compile errors
-    "outDir": "./dist", // Output directory for compiled files
-    "sourceMap": true // Generate sourcemaps
+    "resolveJsonModule": true // Enable importing JSON files as modules
   },
   "include": [
     "src/**/*.ts"
