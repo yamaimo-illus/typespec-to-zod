@@ -1,5 +1,5 @@
 import type { OpenAPIObject } from 'openapi3-ts/oas31'
-import fs from 'node:fs'
+import * as fs from 'node:fs'
 import { Validator } from '@seriousme/openapi-schema-validator'
 import consola from 'consola'
 
