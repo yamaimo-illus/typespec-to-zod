@@ -1,8 +1,8 @@
 import type { ComponentsObject } from 'openapi3-ts/oas31'
 import type { Node } from 'typescript'
-import c from '../constants'
-import ast from './ast'
-import utils from './utils'
+import c from '../constants.js'
+import ast from './ast.js'
+import utils from './utils.js'
 
 export class ComponentParser {
   public toAst(componentsObject: ComponentsObject) {

@@ -1,9 +1,9 @@
 import type { OperationObject, PathsObject, SchemaObject } from 'openapi3-ts/oas31'
 import type { Node } from 'typescript'
 import consola from 'consola'
-import c from '../constants'
-import ast from './ast'
-import utils from './utils'
+import c from '../constants.js'
+import ast from './ast.js'
+import utils from './utils.js'
 
 export class PathParser {
   private methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']

@@ -4,8 +4,8 @@ import { EOL } from 'node:os'
 import consola from 'consola'
 import { isReferenceObject, isSchemaObject } from 'openapi3-ts/oas31'
 import * as ts from 'typescript'
-import c from '../constants'
-import utils from './utils'
+import c from '../constants.js'
+import utils from './utils.js'
 
 function getSchemaNameFromRef($ref: string) {
   if (!$ref.startsWith('#/components/schemas')) {
