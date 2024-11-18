@@ -1,4 +1,4 @@
-# typespec-to-zod Example
+# Petstore
 
 ## Getting started
 

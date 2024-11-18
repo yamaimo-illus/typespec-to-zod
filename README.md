@@ -7,7 +7,7 @@ This library is effortlessly converts YAML from TypeSpec into Zod schemas.
 Provide the CLI with the input/output file path and additional options as shown below.
 
 ```sh
-typespec-to-zod -i example/openapi.yaml -o example/openapi.ts -c -p -q
+typespec-to-zod -i path/to/openapi.yaml -o path/to/generated.ts -c -p -q
 ```
 
 ## Command-line options

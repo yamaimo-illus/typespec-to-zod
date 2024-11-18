@@ -1,10 +1,10 @@
 {
-  "name": "examples",
+  "name": "petstore",
   "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "gen": "typespec-to-zod -i ./output/openapi.yaml -o ./gen/openapi.ts -c true -p true -q true"
+    "gen": "typespec-to-zod -i ./output/openapi.yaml -o ./gen/openapi.ts -c -p -q"
   },
   "peerDependencies": {
     "@typespec/compiler": "latest",
