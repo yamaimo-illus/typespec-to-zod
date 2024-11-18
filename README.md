@@ -24,8 +24,8 @@ The tool supports a variety of command-line options to customize the output:
 
 ## Examples
 
-- [petstore(basic)](https://github.com/yamaimo-illus/typespec-to-zod/tree/main/examples/petstore)
-- [with-hono(advanced)](https://github.com/yamaimo-illus/typespec-to-zod/tree/main/examples/with-hono)
+- [Petstore(basic)](https://github.com/yamaimo-illus/typespec-to-zod/tree/main/examples/petstore)
+- [with Hono(advanced)](https://github.com/yamaimo-illus/typespec-to-zod/tree/main/examples/with-hono)
 
 ## Supported TypeSpec built-in types
 
