@@ -22,6 +22,11 @@ The tool supports a variety of command-line options to customize the output:
 | `-p, --paths`      | Flag to generate paths.                    | false   |
 | `-q, --queries`    | Flag to generate queries.                  | false   |
 
+## Examples
+
+- [petstore(basic)](https://github.com/yamaimo-illus/typespec-to-zod/tree/main/examples/petstore)
+- [with-hono(advanced)](https://github.com/yamaimo-illus/typespec-to-zod/tree/main/examples/with-hono)
+
 ## Supported TypeSpec built-in types
 
 See [Built-in types | TypeSpec](https://typespec.io/docs/language-basics/built-in-types).
