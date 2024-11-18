@@ -1,9 +1,9 @@
 import type { OperationObject, PathsObject, SchemaObject } from 'openapi3-ts/oas31'
 import type { Node } from 'typescript'
+import camelCase from 'camelcase'
 import consola from 'consola'
 import c from '../constants.js'
 import ast from './ast.js'
-import utils from './utils.js'
 
 export class PathParser {
   private methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']
@@ -41,7 +41,7 @@ export class PathParser {
         const schema = this.toSchemas(operationObject, 'path')
         if (schema) {
           const statement = ast.createZodVariableStatement(
-            utils.toCamelcase(`${c.PATH_PREFIX}_${operationId}`),
+            camelCase(`${c.PATH_PREFIX}_${operationId}`),
             schema,
           )
           nodes.push(statement)
@@ -65,7 +65,7 @@ export class PathParser {
         const schema = this.toSchemas(operationObject, 'query')
         if (schema) {
           const statement = ast.createZodVariableStatement(
-            utils.toCamelcase(`${c.QUERY_PREFIX}_${operationId}`),
+            camelCase(`${c.QUERY_PREFIX}_${operationId}`),
             schema,
           )
           nodes.push(statement)

@@ -1,11 +1,11 @@
 import type { ComponentsObject, OpenAPIObject, ParameterObject, ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
 import type { CallExpression, Identifier, Node, ObjectLiteralElementLike } from 'typescript'
 import { EOL } from 'node:os'
+import camelCase from 'camelcase'
 import consola from 'consola'
 import { isReferenceObject, isSchemaObject } from 'openapi3-ts/oas31'
 import * as ts from 'typescript'
 import c from '../constants.js'
-import utils from './utils.js'
 
 function getSchemaNameFromRef($ref: string) {
   if (!$ref.startsWith('#/components/schemas')) {
@@ -108,7 +108,7 @@ function createZodSchemaAst(
 ): CallExpression | Identifier {
   if (isReferenceObject(object)) {
     const name = getSchemaNameFromRef(object.$ref)
-    return ts.factory.createIdentifier(utils.toCamelcase(`${c.SCHEMA_PREFIX}_${name}`))
+    return ts.factory.createIdentifier(camelCase(`${c.SCHEMA_PREFIX}_${name}`))
   }
 
   const createBaseExpression = () => {
