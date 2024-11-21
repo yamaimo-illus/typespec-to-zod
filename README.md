@@ -14,13 +14,14 @@ typespec-to-zod -i path/to/openapi.yaml -o path/to/generated.ts -c -p -q
 
 The tool supports a variety of command-line options to customize the output:
 
-| Options            | Description                                | Default |
-|--------------------|--------------------------------------------|---------|
-| `-i, --input`      | Path to the OpenAPI YAML file.             | N/A     |
-| `-o, --output`     | Output file path for the generated schema. | N/A     |
-| `-c, --components` | Flag to generate components.               | false   |
-| `-p, --paths`      | Flag to generate paths.                    | false   |
-| `-q, --queries`    | Flag to generate queries.                  | false   |
+| Options               | Description                                | Default |
+|-----------------------|--------------------------------------------|---------|
+| `-i, --input`         | Path to the OpenAPI YAML file.             | N/A     |
+| `-o, --output`        | Output file path for the generated schema. | N/A     |
+| `-c, --components`    | Flag to generate components.               | false   |
+| `-p, --paths`         | Flag to generate paths.                    | false   |
+| `-q, --queries`       | Flag to generate queries.                  | false   |
+| `-n, --nullable-mode` | Set null handling mode: nullish/optional   | nullish |
 
 ## Examples
 
