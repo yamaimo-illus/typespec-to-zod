@@ -3,6 +3,7 @@ import { defineCommand, runMain } from 'citty'
 import packageJson from '../package.json'
 import { CodeGenerator } from './codeGenerator.js'
 import { FileManager } from './fileManager.js'
+import { setGlobalOptions } from './globals.js'
 
 const main = defineCommand({
   meta: {
@@ -11,43 +12,52 @@ const main = defineCommand({
     description: packageJson.description,
   },
   args: {
-    input: {
+    'input': {
       type: 'string',
       alias: ['i'],
       description: 'Input .yaml path',
       required: true,
     },
-    output: {
+    'output': {
       type: 'string',
       alias: ['o'],
       description: 'Output .ts path',
       required: true,
     },
-    components: {
+    'components': {
       type: 'boolean',
       alias: ['c'],
       description: 'Generate components',
       required: false,
       default: false,
     },
-    paths: {
+    'paths': {
       type: 'boolean',
       alias: ['p'],
       description: 'Generate paths',
       required: false,
       default: false,
     },
-    queries: {
+    'queries': {
       type: 'boolean',
       alias: ['q'],
       description: 'Generate queries',
       required: false,
       default: false,
     },
+    'nullable-mode': {
+      type: 'string',
+      alias: ['n'],
+      description: '',
+      required: false,
+      default: 'nullish',
+    },
   },
   run: async ({ args }) => {
     const fileManager = new FileManager(args.input, args.output)
     const openApiObject = await fileManager.load()
+
+    setGlobalOptions({ nullableMode: args.nullableMode as 'nullish' | 'optional' })
 
     const codeGenerator = new CodeGenerator(
       openApiObject,

@@ -6,6 +6,7 @@ import consola from 'consola'
 import { isReferenceObject, isSchemaObject } from 'openapi3-ts/oas31'
 import * as ts from 'typescript'
 import c from '../constants.js'
+import { getGlobalOptions } from '../globals.js'
 
 function getSchemaNameFromRef($ref: string) {
   if (!$ref.startsWith('#/components/schemas')) {
@@ -213,8 +214,8 @@ function createZodSchemaAst(
     expression = applyMergeToZodExpression(object, expression)
     expression = applyFormatToZodExpression(object, expression)
     expression = applyConstraintsToZodExpression(object, expression)
+    expression = applyNullableToZodExpression(required, expression)
     expression = applyDefaultToZodExpression(object, expression)
-    expression = applyNullishToZodExpression(required, expression)
   }
 
   return expression
@@ -386,21 +387,22 @@ function applyDefaultToZodExpression(object: SchemaObject, callExpression: CallE
 }
 
 /**
- * Marks a zod call expression as nullish.
+ * Marks a zod call expression as nullish or optional.
  *
  * @param required - If false, adds a nullish modifier to the zod type.
  * @param callExpression - The current call expression.
  * @returns The modified CallExpression.
  */
-function applyNullishToZodExpression(required: boolean, callExpression: CallExpression) {
+function applyNullableToZodExpression(required: boolean, callExpression: CallExpression) {
   if (required) {
     return callExpression
   }
+  const identifier = getGlobalOptions().nullableMode
 
   return ts.factory.createCallExpression(
     ts.factory.createPropertyAccessExpression(
       callExpression,
-      ts.factory.createIdentifier('nullish'),
+      ts.factory.createIdentifier(identifier),
     ),
     undefined,
     [],
@@ -698,7 +700,7 @@ export default {
   createZodVariableStatement,
   applyFormatToZodExpression,
   applyDefaultToZodExpression,
-  applyNullishToZodExpression,
+  applyNullableToZodExpression,
   applyConstraintsToZodExpression,
   applyMergeToZodExpression,
   applyComment,
