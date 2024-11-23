@@ -37,7 +37,7 @@ export class PathParser {
         if (!operationObject) {
           continue
         }
-        const operationId = operationObject.operationId
+        const operationId = ast.toValidIdentifier(operationObject.operationId ?? '')
         const schema = this.toSchemas(operationObject, 'path')
         if (schema) {
           const statement = ast.createZodVariableStatement(
@@ -61,7 +61,7 @@ export class PathParser {
         if (!operationObject) {
           continue
         }
-        const operationId = operationObject.operationId
+        const operationId = ast.toValidIdentifier(operationObject.operationId ?? '')
         const schema = this.toSchemas(operationObject, 'query')
         if (schema) {
           const statement = ast.createZodVariableStatement(

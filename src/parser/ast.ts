@@ -8,13 +8,67 @@ import * as ts from 'typescript'
 import c from '../constants.js'
 import { getGlobalOptions } from '../globals.js'
 
+/**
+ * Converts a string into a valid TypeScript identifier.
+ *
+ * @param str - The string to convert into a valid identifier.
+ * @returns A valid TypeScript identifier.
+ *
+ * @example
+ * ```ts
+ * toValidIdentifier('123abc') // Returns '_123abc'
+ * toValidIdentifier('hello-world') // Returns 'hello_world'
+ * toValidIdentifier('class') // Returns '_class' (reserved keyword)
+ * toValidIdentifier('') // Returns '_'
+ * ```
+ *
+ * @remarks
+ * This function performs the following transformations:
+ * - Replaces invalid starting characters with '_'
+ * - Converts invalid characters to '_'
+ * - Prefixes reserved TypeScript keywords with '_'
+ * - Returns '_' for empty strings
+ *
+ * Valid identifiers must:
+ * - Start with a letter, underscore (_), or dollar sign ($)
+ * - Contain only letters, numbers, underscores, or dollar signs
+ * - Not be a reserved TypeScript keyword
+ */
+function toValidIdentifier(str: string) {
+  if (!str) {
+    return '_'
+  }
+  let result = str.replace(/^[^a-z_$]/i, match => /\d/.test(match) ? `_${match}` : '_')
+  result = result.replace(/[^\w$]/g, '_')
+
+  if (c.TS_RESERVED_KEYWORDS.includes(result)) {
+    result = `_${result}`
+  }
+  return result
+}
+
+/**
+ * Extracts the schema name from a reference string ($ref).
+ *
+ * @param $ref - The reference string in the format "#/components/schemas/SchemaName".
+ * @returns The schema name extracted from the reference path. Returns an empty string if the path is invalid.
+ *
+ * @example
+ * ```ts
+ * const ref = "#/components/schemas/User"
+ * getSchemaNameFromRef(ref) // Returns "User"
+ * ```
+ *
+ * @remarks
+ * This function expects references to follow the OpenAPI convention of using "#/components/schemas/"
+ * as the base path. If the reference doesn't follow this convention, a warning will be logged.
+ */
 function getSchemaNameFromRef($ref: string) {
   if (!$ref.startsWith('#/components/schemas')) {
     consola.warn('$ref does not start with the expected path `#/components/schemas`.')
   }
   return $ref.split('/').pop() ?? ''
 }
-
 /**
  * Creates an import declaration for the zod library.
  *
@@ -240,8 +294,15 @@ function createZodPropertyAssignmentAst(
   object: SchemaObject | ReferenceObject,
   required: boolean = true,
 ) {
+  // Creates the property name for the AST node, either as an Identifier if it's a valid JavaScript
+  // identifier (starts with a letter, underscore, or $ and contains only letters, numbers, underscores, or $),
+  // or as a StringLiteral if it contains special characters
+  const propertyName = /^[a-z_$][\w$]*$/i.test(identifier)
+    ? ts.factory.createIdentifier(identifier)
+    : ts.factory.createStringLiteral(identifier)
+
   const assignment = ts.factory.createPropertyAssignment(
-    ts.factory.createIdentifier(identifier),
+    propertyName,
     createZodSchemaAst(object, required),
   )
   const description = removeZodSchemaFromDescription(object.description)
@@ -692,6 +753,7 @@ function printAst(ast: Node[]) {
 }
 
 export default {
+  toValidIdentifier,
   getSchemaNameFromRef,
   createZodImportAst,
   createZodPropertyAccessAst,
