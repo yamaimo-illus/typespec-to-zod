@@ -69,6 +69,7 @@ function getSchemaNameFromRef($ref: string) {
   }
   return $ref.split('/').pop() ?? ''
 }
+
 /**
  * Creates an import declaration for the zod library.
  *
