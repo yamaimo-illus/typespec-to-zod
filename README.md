@@ -275,7 +275,7 @@ These format decorators in TypeSpec can be converted to specific constraints in 
 
 ## Extended Syntax for Doc Decorator
 
-By using the `zod:` identifier within a doc comment, you can instruct the `typespec-to-zod` tool to generate Zod schemas with specific requirements.
+By using the `zod:` identifier within a doc comment, you can instruct the `typespec-to-zod` to generate Zod schemas with specific requirements.
 
 This feature provides greater flexibility and control over the validation rules directly from the TypeSpec model.
 
