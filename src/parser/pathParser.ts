@@ -10,7 +10,7 @@ export class PathParser {
 
   private toSchemas(operationObject: OperationObject, inType: 'path' | 'query') {
     const parameters = operationObject.parameters ?? []
-    const schema: SchemaObject = { type: 'object', properties: {} }
+    const schema: SchemaObject = { type: 'object', properties: {}, required: [] }
 
     for (const parameter of parameters) {
       if (!ast.isParameterObject(parameter)) {
@@ -19,6 +19,9 @@ export class PathParser {
       }
       if (parameter.schema && parameter.in === inType) {
         schema.properties![parameter.name] = parameter.schema
+        if (parameter.required) {
+          schema.required!.push(parameter.name)
+        }
       }
     }
 

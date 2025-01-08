@@ -26,13 +26,13 @@ export const schemaValidationError = z.object({
 export const schemaPetType = z.enum(["dog", "cat", "fish", "bird", "reptile"]);
 
 export const pathPetsGet = z.object({
-    petId: z.number().int().nullish()
+    petId: z.number().int()
 });
 
 export const pathPetsUpdate = z.object({
-    petId: z.number().int().nullish()
+    petId: z.number().int()
 });
 
 export const pathPetsDelete = z.object({
-    petId: z.number().int().nullish()
+    petId: z.number().int()
 });
