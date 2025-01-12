@@ -1,13 +1,5 @@
 import { z } from "zod";
 
-/*
- ██████╗ ██████╗ ███╗   ███╗██████╗  ██████╗ ███╗   ██╗███████╗███╗   ██╗████████╗███████╗
-██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔═══██╗████╗  ██║██╔════╝████╗  ██║╚══██╔══╝██╔════╝
-██║     ██║   ██║██╔████╔██║██████╔╝██║   ██║██╔██╗ ██║█████╗  ██╔██╗ ██║   ██║   ███████╗
-██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║   ██║██║╚██╗██║██╔══╝  ██║╚██╗██║   ██║   ╚════██║
-╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ╚██████╔╝██║ ╚████║███████╗██║ ╚████║   ██║   ███████║
- ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝
-*/
 export const schemaInternalServerError = z.object({
     code: z.enum(["INTERNAL_SERVER_ERROR"]),
     message: z.string()
@@ -33,22 +25,14 @@ export const schemaValidationError = z.object({
 
 export const schemaPetType = z.enum(["dog", "cat", "fish", "bird", "reptile"]);
 
-/*
-██████╗  █████╗ ████████╗██╗  ██╗███████╗
-██╔══██╗██╔══██╗╚══██╔══╝██║  ██║██╔════╝
-██████╔╝███████║   ██║   ███████║███████╗
-██╔═══╝ ██╔══██║   ██║   ██╔══██║╚════██║
-██║     ██║  ██║   ██║   ██║  ██║███████║
-╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
-*/
 export const pathPetsGet = z.object({
-    petId: z.number().int().nullish()
+    petId: z.number().int()
 });
 
 export const pathPetsUpdate = z.object({
-    petId: z.number().int().nullish()
+    petId: z.number().int()
 });
 
 export const pathPetsDelete = z.object({
-    petId: z.number().int().nullish()
+    petId: z.number().int()
 });

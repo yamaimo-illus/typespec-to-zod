@@ -1,14 +1,6 @@
 import { z } from "zod";
 
 // Category model
-/*
- ██████╗ ██████╗ ███╗   ███╗██████╗  ██████╗ ███╗   ██╗███████╗███╗   ██╗████████╗███████╗
-██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔═══██╗████╗  ██║██╔════╝████╗  ██║╚══██╔══╝██╔════╝
-██║     ██║   ██║██╔████╔██║██████╔╝██║   ██║██╔██╗ ██║█████╗  ██╔██╗ ██║   ██║   ███████╗
-██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║   ██║██║╚██╗██║██╔══╝  ██║╚██╗██║   ██║   ╚════██║
-╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ╚██████╔╝██║ ╚████║███████╗██║ ╚████║   ██║   ███████║
- ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝
-*/
 export const schemaCategory = z.object({
     id: z.string().cuid2(),
     // category name
@@ -31,9 +23,9 @@ export const schemaCategoryCreateItem = z.object({
 
 // Category model
 export const schemaCategoryUpdate = z.object({
-    id: z.string().cuid2().nullish(),
+    id: z.string().cuid2().optional(),
     // category name
-    name: z.string().min(2).max(32).nullish()
+    name: z.string().min(2).max(32).optional()
 });
 
 // Post model
@@ -77,17 +69,17 @@ export const schemaPostCreateItem = z.object({
 
 // Post model
 export const schemaPostUpdate = z.object({
-    id: z.string().cuid2().nullish(),
-    title: z.string().min(1).nullish(),
+    id: z.string().cuid2().optional(),
+    title: z.string().min(1).optional(),
     // Markdown formatted string
-    body: z.string().min(1).nullish(),
+    body: z.string().min(1).optional(),
     categories: z.array(z.object({
         id: z.string().cuid2(),
         // category name
         name: z.string().min(2).max(32),
         createdAt: z.string().datetime(),
         updatedAt: z.string().datetime()
-    })).nullish()
+    })).optional()
 });
 
 // User model
@@ -135,11 +127,11 @@ export const schemaUserCreate = z.object({
 
 // User model
 export const schemaUserUpdate = z.object({
-    id: z.string().cuid2().nullish(),
+    id: z.string().cuid2().optional(),
     // username
-    name: z.string().min(2).max(32).nullish(),
-    email: z.string().email().nullish(),
-    age: z.number().int().gte(18).nullish(),
+    name: z.string().min(2).max(32).optional(),
+    email: z.string().email().optional(),
+    age: z.number().int().gte(18).optional(),
     posts: z.array(z.object({
         id: z.string().cuid2(),
         title: z.string().min(1),
@@ -154,74 +146,58 @@ export const schemaUserUpdate = z.object({
         })),
         createdAt: z.string().datetime(),
         updatedAt: z.string().datetime()
-    })).nullish()
+    })).optional()
 });
 
 export const schemaCuid2 = z.string().cuid2();
 
-/*
-██████╗  █████╗ ████████╗██╗  ██╗███████╗
-██╔══██╗██╔══██╗╚══██╔══╝██║  ██║██╔════╝
-██████╔╝███████║   ██║   ███████║███████╗
-██╔═══╝ ██╔══██║   ██║   ██╔══██║╚════██║
-██║     ██║  ██║   ██║   ██║  ██║███████║
-╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
-*/
 export const pathCategoriesGet = z.object({
-    id: z.string().cuid2().nullish()
+    id: z.string().cuid2()
 });
 
 export const pathCategoriesDelete = z.object({
-    id: z.string().cuid2().nullish()
+    id: z.string().cuid2()
 });
 
 export const pathCategoriesUpdate = z.object({
-    id: z.string().cuid2().nullish()
+    id: z.string().cuid2()
 });
 
 export const pathPostsGet = z.object({
-    id: z.string().cuid2().nullish()
+    id: z.string().cuid2()
 });
 
 export const pathPostsDelete = z.object({
-    id: z.string().cuid2().nullish()
+    id: z.string().cuid2()
 });
 
 export const pathPostsUpdate = z.object({
-    id: z.string().cuid2().nullish()
+    id: z.string().cuid2()
 });
 
 export const pathUsersGet = z.object({
-    id: z.string().cuid2().nullish()
+    id: z.string().cuid2()
 });
 
 export const pathUsersDelete = z.object({
-    id: z.string().cuid2().nullish()
+    id: z.string().cuid2()
 });
 
 export const pathUsersUpdate = z.object({
-    id: z.string().cuid2().nullish()
+    id: z.string().cuid2()
 });
 
-/*
- ██████╗ ██╗   ██╗███████╗██████╗ ██╗███████╗███████╗
-██╔═══██╗██║   ██║██╔════╝██╔══██╗██║██╔════╝██╔════╝
-██║   ██║██║   ██║█████╗  ██████╔╝██║█████╗  ███████╗
-██║▄▄ ██║██║   ██║██╔══╝  ██╔══██╗██║██╔══╝  ╚════██║
-╚██████╔╝╚██████╔╝███████╗██║  ██║██║███████╗███████║
- ╚══▀▀═╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝
-*/
 export const queryCategoriesList = z.object({
-    limit: z.string().default("20").nullish(),
-    offset: z.string().default("0").nullish()
+    limit: z.string().optional().default("20"),
+    offset: z.string().optional().default("0")
 });
 
 export const queryPostsList = z.object({
-    limit: z.string().default("20").nullish(),
-    offset: z.string().default("0").nullish()
+    limit: z.string().optional().default("20"),
+    offset: z.string().optional().default("0")
 });
 
 export const queryUsersList = z.object({
-    limit: z.string().default("20").nullish(),
-    offset: z.string().default("0").nullish()
+    limit: z.string().optional().default("20"),
+    offset: z.string().optional().default("0")
 });
